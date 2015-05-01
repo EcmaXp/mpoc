@@ -9,8 +9,9 @@ os.chdir("../micropython/opencom") # prepatch
 
 MPOC_BIOS = "../../mpoc-rom/bios.py"
 
-if subprocess.call(["ccache", "-V"], stdout=subprocess.PIPE) == 0:
-    os.environ["CROSS_COMPILE"] = "ccache "
+if not os.environ.get("CROSS_COMPILE"):
+    if subprocess.call(["ccache", "-V"], stdout=subprocess.PIPE) == 0:
+        os.environ["CROSS_COMPILE"] = "ccache "
 
 if os.system("make") == 0:
     cmdline = ["./micropython"]

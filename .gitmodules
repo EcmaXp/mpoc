@@ -5,5 +5,5 @@
 	path = opencomputers
 	url = git@github.com:EcmaXp/opencomputers.git
 [submodule "msgpack-c"]
-	path = msgpack
+	path = "msgpack-c"
 	url = git@github.com:msgpack/msgpack-c.git
