@@ -1,0 +1,9 @@
+[submodule "micropython"]
+	path = micropython
+	url = git@github.com:EcmaXp/micropython.git
+[submodule "opencomputers"]
+	path = opencomputers
+	url = git@github.com:EcmaXp/opencomputers.git
+[submodule "msgpack-c"]
+	path = msgpack
+	url = git@github.com:msgpack/msgpack-c.git

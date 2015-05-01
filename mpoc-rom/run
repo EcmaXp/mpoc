@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+import sys
+import subprocess
+import threading
+import time
+import os
+
+os.chdir("../micropython/opencom") # prepatch
+
+MPOC_BIOS = "../../mpoc-rom/bios.py"
+
+if subprocess.call(["ccache", "-V"], stdout=subprocess.PIPE) == 0:
+    os.environ["CROSS_COMPILE"] = "ccache "
+
+if os.system("make") == 0:
+    cmdline = ["./micropython"]
+    if len(sys.argv) == 1:
+        cmdline += ["run!"]
+        code = None
+    elif len(sys.argv) == 2:
+        code = sys.argv[1]
+        if code == "bios!":
+            cmdline += [MPOC_BIOS]
+            code = None
+        elif code.endswith("!"):
+            exit("error: Unsupported command detected")
+    else:
+        exit("usage: ./r [code] or ./r bios!")
+    
+    proc = subprocess.Popen(cmdline,
+        stdin=subprocess.PIPE,
+    )
+    
+    if code is None:
+        def kill():
+            try:
+                proc.kill()
+            except Exception:
+                pass
+
+        threading.Timer(1, kill).start()
+    
+    try:
+        if code:
+            proc.stdin.write(code.encode())
+        proc.stdin.close()
+        exit(proc.wait())
+    except KeyboardInterrupt:
+        proc.kill()
+        raise
