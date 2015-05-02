@@ -16,17 +16,12 @@ if not os.environ.get("CROSS_COMPILE"):
 if os.system("make") == 0:
     cmdline = ["./micropython"]
     if len(sys.argv) == 1:
-        cmdline += ["run!"]
+        cmdline += [MPOC_BIOS]
         code = None
-    elif len(sys.argv) == 2:
-        code = sys.argv[1]
-        if code == "bios!":
-            cmdline += [MPOC_BIOS]
-            code = None
-        elif code.endswith("!"):
-            exit("error: Unsupported command detected")
+    elif len(sys.argv) >= 2:
+        cmdline += sys.argv[1:]
     else:
-        exit("usage: ./r [code] or ./r bios!")
+        exit("usage: ./r [file] [args ...]")
     
     proc = subprocess.Popen(cmdline,
         stdin=subprocess.PIPE,
@@ -39,7 +34,7 @@ if os.system("make") == 0:
             except Exception:
                 pass
 
-        threading.Timer(1, kill).start()
+        # threading.Timer(1, kill).start()
     
     try:
         if code:
