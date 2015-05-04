@@ -1,59 +1,120 @@
 import sys
 from sys import exit
 sys.path.append(".")
-sys.path.append(__file__.rpartition("/")[0])
-
-import microthread
-from microthread import MicroThread, pause
-
-def dresume(thread, value=None):
-    kind, result = thread.resume(value)
-    
-    if kind == "exception":
-        result = repr(result)
-    elif result is None:
-        result = ""
-      
-    print(thread.name, kind, result)
-
-@microthread.auto(3, 2)
-def hello(a, b):
-    print(a, b)
-    print(pause(3), pause())
-    return 32
-
-print(hello)
-dresume(hello)
-dresume(hello, 32)
-dresume(hello, 31)
+sys.path.append(__file__.rpartition("/")[0] + "/lib")
 
 import utime
 
-def gen():
-    pass
+import microthread
+from microthread import pause as _pause
+from microthread import STATUS_NORMAL, STATUS_YIELD, STATUS_EXCEPTION, \
+    STATUS_LIMIT, STATUS_PAUSE, STATUS_FORCE_PAUSE, STATUS_STOP, \
+    LIMIT_SOFT, LIMIT_HARD
 
-class sup():
-    def __enter__(self):
-        pause()
+call_stack = []
 
-    def __exit__(self, a, b, c):
-        pass
+def pause(value=None):
+    call_stack.pop()
+    return _pause((call_stack[-1], value))
 
-for i in range(1, 16 + 1):
-    @microthread.auto()
-    def evil():
-        "i am evil!"
-        for i in range(1024 * 1024 * 1024):
-            pass
+def call(func, value=None):
+    call_stack.append(func)
+    result, error = _pause((func, value))
+    if error:
+        raise error
+    return result
+
+def thread_ready_call(func):
+    call_stack.append(None)
+    call_stack.append(None)
+    print(func())
+    call_stack.pop()
+    return func
+
+System = {}
+def system_func(func):
+    System[func.__name__] = func
+    return func
+
+@system_func
+def hello(a):
+    return a + 1
     
-    limit = 1 + i * 1024 * 1024
-    evil.cpu_hard_limit = limit
-    evil.cpu_soft_limit = limit >> 1
-    
-    a = utime.time()
-    dresume(evil)
-    b = utime.time()
-    
-    print(i, "M =>", round((b - a) * 1000), "ms")
+@system_func
+def hello2(b):
+    return b + "hello"
 
-print("haha!")
+@thread_ready_call
+@microthread.auto()
+def system():
+    result = None
+    while True:
+        call_info = pause(result)
+        funcname, args = call_info
+        
+        try:
+            result = System.get(funcname)(*args), None
+        except BaseException as e:
+            result = None, e
+
+def syscall(funcname, *args):
+    return call(system, (funcname, args))
+
+@microthread.auto()
+def bios():
+    def syscall_dbg(funcname, *args):
+        result = syscall(funcname, *args)
+        print('>', result)
+        return result
+        
+    syscall_dbg("hello", 3)
+    syscall_dbg("hello2", "world!")
+    syscall_dbg("hello2", "world2!")
+
+def run():
+    thread = bios
+    send_value = None
+    call_stack.append(bios)
+    while call_stack:
+        print('[%i] %s(%r)' % (len(call_stack), thread.name, send_value))
+        status, result = thread(send_value)
+        next_thread = None
+        if status != STATUS_PAUSE:
+            print('[+]', '%s -> %s: %s' % (thread.name, status, result))
+        
+        if status == STATUS_PAUSE:
+            next_thread, send_value = result
+            
+        elif status == STATUS_EXCEPTION:
+            print("=" * 5, "exception on", thread.name, "=" * 5)
+            sys.print_exception(result)
+            print("=" * 20)
+            call_stack.pop()
+            send_value = None
+        elif status == STATUS_STOP:
+            call_stack.pop()
+            send_value = None
+        else:
+            send_value = None
+        
+        if next_thread is None:
+            next_thread = bios
+        
+        thread = next_thread
+        utime.sleep(0.25)
+
+run()
+
+"""
+import taskmgr
+
+@taskmgr.auto()
+def bios():
+    while True:
+        syscall("world", "hello")
+        syscall("world", "hello2")
+        
+from opencom import syscall
+
+taskmgr.run(bios)
+"""

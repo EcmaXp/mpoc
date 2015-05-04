@@ -40,7 +40,13 @@ if os.system("make") == 0:
         if code:
             proc.stdin.write(code.encode())
         proc.stdin.close()
-        exit(proc.wait())
+        
+        exitcode = proc.wait()
+        if exitcode == -11:
+            print("Segmentation fault")
+        elif exitcode < 0:
+            print("Exit Code:", exitcode)
+            
+        exit(exitcode)
     except KeyboardInterrupt:
         proc.kill()
-        raise
