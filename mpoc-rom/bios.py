@@ -11,6 +11,21 @@ from microthread import STATUS_NORMAL, STATUS_YIELD, STATUS_EXCEPTION, \
     STATUS_LIMIT, STATUS_PAUSE, STATUS_FORCE_PAUSE, STATUS_STOP, \
     LIMIT_SOFT, LIMIT_HARD
 
+@microthread.auto()
+def hello():
+    try:
+        import sys
+        print(hex)
+        while True:
+            pass
+    except:
+        print("?")
+
+hello.cpu_hard_limit = 256
+print(hello())
+print(hello())
+exit()
+
 call_stack = []
 
 def pause(value=None):
@@ -62,11 +77,32 @@ def syscall(funcname, *args):
 
 @microthread.auto()
 def bios():
+    class test():
+        def world(self):
+            _pause(self)
+            return 32
+        
+    world = microthread.auto()(test().world)
+    print(world())
+    print(world())
+    print(world())
+    
+    closure = None
+    @microthread.auto()
+    def closure_func():
+        nonlocal closure
+        closure = 32
+        _pause()
+        return closure
+    print(closure_func())
+    print(closure_func())
+    print(closure_func())
+    
     def syscall_dbg(funcname, *args):
         result = syscall(funcname, *args)
         print('>', result)
         return result
-        
+
     syscall_dbg("hello", 3)
     syscall_dbg("hello2", "world!")
     syscall_dbg("hello2", "world2!")
