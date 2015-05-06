@@ -10,6 +10,11 @@ from microthread import pause as _pause
 from microthread import STATUS_NORMAL, STATUS_YIELD, STATUS_EXCEPTION, \
     STATUS_LIMIT, STATUS_PAUSE, STATUS_FORCE_PAUSE, STATUS_STOP, \
     LIMIT_SOFT, LIMIT_HARD
+    
+import machine
+print(machine.mem32[id(machine)])
+print(machine.mem32[id(machine) + 4])
+print(dir(machine))
 
 @microthread.auto()
 def hello():

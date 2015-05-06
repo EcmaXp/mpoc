@@ -19,6 +19,9 @@ if os.system("make") == 0:
         cmdline += [MPOC_BIOS]
         code = None
     elif len(sys.argv) >= 2:
+        if sys.argv[1] == "build!":
+            sys.exit(0)
+        
         cmdline += sys.argv[1:]
     else:
         exit("usage: ./r [file] [args ...]")

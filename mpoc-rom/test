@@ -1,0 +1,31 @@
+#!/bin/bash
+cd "$( dirname ${BASH_SOURCE[0]})"
+
+abspath() {
+  # $1 : relative filename
+  echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
+}
+
+export MPOC_ROOT=$( abspath ".." )
+
+export OPENCOM_BIN=$MPOC_ROOT/micropython/opencom
+export OPENCOM_HOME=$MPOC_ROOT/mpoc-rom/lib
+
+export PATH=$PATH:$OPENCOM_BIN
+export MICROPY_MICROPYTHON=$OPENCOM_BIN/micropython
+export MICROPYPATH=$OPENCOM_BIN:$OPENCOM_HOME
+
+./run build!
+
+cd tests
+touch ./_.py.exp
+rm ./*.py.exp
+touch ./_.py.out
+rm ./*.py.out
+
+$MPOC_ROOT/micropython/tests/run-tests-exp.sh opencom/*.py
+
+# TODO: if noting failed then execute real run-test?
+
+# cd $MPOC_ROOT/micropython/tests
+# ./run-tests
