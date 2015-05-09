@@ -1,0 +1,11 @@
+This folder are contains some environment.
+
+- jre1.8.0_45
+- jython2.7
+- forge-1.7.10
+- opencom1.5.9:
+    - OpenComputers-MC1.7.10-1.5.9.21-universal.jar
+    - OpenComputers-JNLua.jar
+    - OpenComputers-LuaJ.jar
+    - lib:
+        - native.* (so, dll, etc)
