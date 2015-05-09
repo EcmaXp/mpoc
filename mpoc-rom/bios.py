@@ -3,6 +3,14 @@ from sys import exit
 sys.path.append(".")
 sys.path.append(__file__.rpartition("/")[0] + "/lib")
 
+import mpoc
+import microthread
+print(mpoc.builtin_modules)
+print(mpoc.get_loaded_modules())
+exit()
+
+exit()
+
 import utime
 
 import microthread
@@ -10,26 +18,6 @@ from microthread import pause as _pause
 from microthread import STATUS_NORMAL, STATUS_YIELD, STATUS_EXCEPTION, \
     STATUS_LIMIT, STATUS_PAUSE, STATUS_FORCE_PAUSE, STATUS_STOP, \
     LIMIT_SOFT, LIMIT_HARD
-    
-import machine
-print(machine.mem32[id(machine)])
-print(machine.mem32[id(machine) + 4])
-print(dir(machine))
-
-@microthread.auto()
-def hello():
-    try:
-        import sys
-        print(hex)
-        while True:
-            pass
-    except:
-        print("?")
-
-hello.cpu_hard_limit = 256
-print(hello())
-print(hello())
-exit()
 
 call_stack = []
 
