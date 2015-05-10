@@ -16,33 +16,31 @@ from java.lang import System
 def get_absenv(name):
     res = os.environ.get(name)
     if not res:
-        exit("error: {} is unset" .format(res))
+        exit("error: {} is unset" .format(name))
     return os.path.abspath(res)
 
+# should load first!
+sys.path.insert(0, get_absenv("VIRTUAL_JAR"))
+
+import java.lang.Exception
+
 MPOC_ROM = get_absenv("MPOC_ROM")
-
-for path, _, files in os.walk(os.path.abspath(get_absenv("FORGE_LIB"))):
-    for filename in files:
-        filepath = os.path.join(path, filename)
-        if filepath.endswith(".jar"):
-            sys.path.append(filepath)
-
-for name in "OPENCOM_JAR", "OPENCOM_JNLUA_JAR", "OPENCOM_LUAJ_JAR":
-    sys.path.append(get_absenv(name))
-
-import li.cil.repack.com.naef.jnlua.LuaState
-
-System.load(get_absenv("OPENCOM_RAW_LIB"))
 
 try:
     import li.cil.oc
 except ImportError:
     exit("error: import OpenCom is failed")
 
-from li.cil.oc.util import LuaStateFactory
-#from li.cil.oc.server.machine.luac import NativeLuaArchitecture
+try:
+    from kr.pe.ecmaxp.mpoc.virtual import JNLuaPreloader
+    JNLuaPreloader().init()
+except:
+    print("error: init JNLua are failed")
+    raise
 
-import code
-code.interact()
+from li.cil.oc.util import LuaStateFactory
+lua = LuaStateFactory.createState().x()
+
+import code; code.interact(None, raw_input, globals())
 
 print(sys.argv[1])

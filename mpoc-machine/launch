@@ -1,19 +1,61 @@
 #!/bin/bash
 
-export JYTHON_HOME="env/jython2.7"
-export JAVA_HOME="env/jre1.8.0_45"
+export LAUNCHER_HOME="/home/ubuntu/workspace/mpoc-machine"
+export LAUNCHER_ENV="$LAUNCHER_HOME/env"
 
-export FORGE_HOME="env/forge-1.7.10"
+export JYTHON_HOME="$LAUNCHER_ENV/jython2.7"
+export JAVA_HOME="$LAUNCHER_ENV/jdk1.8.0_45"
+export SCALA_HOME="$LAUNCHER_ENV/scala-2.11.6"
+
+export VIRTUAL_HOME="$LAUNCHER_ENV/virtual"
+export VIRTUAL_SRC="$VIRTUAL_HOME/src"
+export VIRTUAL_BUILD="$VIRTUAL_HOME/build"
+export VIRTUAL_MANIFEST="$VIRTUAL_HOME/manifest"
+export VIRTUAL_JAR="$VIRTUAL_HOME/virtual.jar"
+
+export FORGE_HOME="$LAUNCHER_ENV/forge-1.7.10"
 export FORGE_LIB="$FORGE_HOME/libraries"
+export FORGE_JAR="$FORGE_HOME/forge-1.7.10-10.13.3.1403-1.7.10-universal.jar"
 export MC_SERVER_JAR="$FORGE_HOME/minecraft_server.1.7.10.jar"
-export OPENCOM_HOME="env/opencom"
+
+export OPENCOM_HOME="$LAUNCHER_ENV/opencom"
 export OPENCOM_JAR="$OPENCOM_HOME/OpenComputers-MC1.7.10-1.5.9.21-universal.jar"
 export OPENCOM_JNLUA_JAR="$OPENCOM_HOME/OpenComputers-JNLua.jar"
-export OPENCOM_LUAJ_JAR="$OPENCOM_HOME/OpenComputers-JNLua.jar"
-export OPENCOM_RAW_LIB="$OPENCOM_HOME/lib/native.64.so"
-export MPOC_ROM="../mpoc-rom"
+export OPENCOM_LUAJ_JAR="$OPENCOM_HOME/OpenComputers-LuaJ.jar"
+export OPENCOM_NATIVE_LIB="$OPENCOM_HOME/lib/native.64.so"
 
-export JAVA_MEM="-Xmx64m"
-export JAVA_OPTS='-Dscala.home="$SCALA_HOME" -Djava.library.path=$OPENCOM_HOME/lib'
+export MPOC_ROM="$LAUNCHER_ENV/../mpoc-rom"
 
+export JAVACMD=$JAVA_HOME/bin/java
+export JAVA_MEM="-Xmx64m -Xms32m"
+export JAVA_OPTS='-Dscala.home="$SCALA_HOME"'
+
+CLASSPATH="`./classpath.py $FORGE_LIB`"
+CLASSPATH+=":$FORGE_JAR"
+CLASSPATH+=":$MC_SERVER_JAR"
+CLASSPATH+=":$OPENCOM_JAR"
+CLASSPATH+=":$OPENCOM_JNLUA_JAR"
+CLASSPATH+=":$OPENCOM_LUAJ_JAR"
+
+export CLASSPATH=$CLASSPATH
+
+touch $VIRTUAL_BUILD
+rm -r $VIRTUAL_BUILD
+mkdir $VIRTUAL_BUILD
+
+echo "comileing java"
+find $VIRTUAL_SRC -name "*.java" | xargs $JAVA_HOME/bin/javac -classpath $CLASSPATH -d $VIRTUAL_BUILD
+if [[ $? != 0 ]]; then exit 1; fi
+
+echo "comileing scala"
+find $VIRTUAL_SRC -name "*.scala" | xargs $SCALA_HOME/bin/scalac -classpath $CLASSPATH -d $VIRTUAL_BUILD
+if [[ $? != 0 ]]; then exit 1; fi
+
+echo "building jar"
+$JAVA_HOME/bin/jar cf $VIRTUAL_JAR $VIRTUAL_MANIFEST -C $VIRTUAL_BUILD .
+if [[ $? != 0 ]]; then exit 1; fi
+
+export CLASSPATH="$VIRTUAL_JAR:$CLASSPATH"
+
+echo "execute jython"
 $JYTHON_HOME/bin/jython ./launch.py $MPOC_ROM/bios.py

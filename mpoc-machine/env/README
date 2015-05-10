@@ -1,9 +1,34 @@
 This folder are contains some environment.
 
-- jre1.8.0_45
-- jython2.7
-- forge-1.7.10
+- virtual:
+    provide minimal environment like minecraft forge server.
+    - build:
+        builded by launch program
+    - src:
+        virtual environ source code
+        - kr/pe/ecmaxp/mpoc/virtual:
+            just some stuff
+        - li.cil.oc:
+            just some patch for running safety on minimal environ
+    - manifest:
+        just simple manifest for contains jar file
+    - virtual.jar:
+        just builded jar for used by launcher
+
+- jdk1.8.0_45:
+    java development kit 1.8.0
+
+- jython2.7:
+    jython 2.7
+
+- forge-1.7.10:
+    forge server
+
+- mcp908:
+    minecraft coder package
+
 - opencom1.5.9:
+    opencom module
     - OpenComputers-MC1.7.10-1.5.9.21-universal.jar
     - OpenComputers-JNLua.jar
     - OpenComputers-LuaJ.jar
