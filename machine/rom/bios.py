@@ -9,8 +9,6 @@ print(mpoc.builtin_modules)
 print(mpoc.get_loaded_modules())
 exit()
 
-exit()
-
 import utime
 
 import microthread
