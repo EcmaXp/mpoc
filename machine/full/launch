@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# TODO: launch forge server and client and execute automation test
+
+echo "This launcher is invaild yet."
+exit 1

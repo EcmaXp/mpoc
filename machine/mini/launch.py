@@ -5,22 +5,18 @@ import threading
 import time
 import os
 
-os.chdir("../micropython/opencom") # prepatch
+def main():
+    subprocess.check_call(["./build.py"])
+    
+    os.chdir("../../micropython/opencom")
+    MPOC_BIOS = os.path.abspath("../../machine/rom/bios.py")
 
-MPOC_BIOS = "../../mpoc-rom/bios.py"
-
-if not os.environ.get("CROSS_COMPILE"):
-    if subprocess.call(["ccache", "-V"], stdout=subprocess.PIPE) == 0:
-        os.environ["CROSS_COMPILE"] = "ccache "
-
-if os.system("make") == 0:
     cmdline = ["./micropython"]
     if len(sys.argv) == 1:
         cmdline += [MPOC_BIOS]
-        code = None
     elif len(sys.argv) >= 2:
         if sys.argv[1] == "build!":
-            sys.exit(0)
+            exit(0)
         
         cmdline += sys.argv[1:]
     else:
@@ -30,18 +26,7 @@ if os.system("make") == 0:
         stdin=subprocess.PIPE,
     )
     
-    if code is None:
-        def kill():
-            try:
-                proc.kill()
-            except Exception:
-                pass
-
-        # threading.Timer(1, kill).start()
-    
     try:
-        if code:
-            proc.stdin.write(code.encode())
         proc.stdin.close()
         
         exitcode = proc.wait()
@@ -53,3 +38,6 @@ if os.system("make") == 0:
         exit(exitcode)
     except KeyboardInterrupt:
         proc.kill()
+
+if __name__ == "__main__":
+    main()

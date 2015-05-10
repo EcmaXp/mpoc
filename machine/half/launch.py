@@ -10,7 +10,7 @@ import glob
 
 if platform.system() != "Java":
     exit("error: not running from java")
-    
+
 from java.lang import System
 
 def get_absenv(name):

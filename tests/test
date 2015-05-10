@@ -8,12 +8,12 @@ abspath() {
 
 export MPOC_ROOT=$( abspath ".." )
 
-export OPENCOM_BIN=$MPOC_ROOT/micropython/opencom
-export OPENCOM_HOME=$MPOC_ROOT/mpoc-rom/lib
+export MICROPY_HOME=$MPOC_ROOT/micropython/opencom
+export MPOC_LIB=$MPOC_ROOT/machine/lib
 
-export PATH=$PATH:$OPENCOM_BIN
-export MICROPY_MICROPYTHON=$OPENCOM_BIN/micropython
-export MICROPYPATH=$OPENCOM_BIN:$OPENCOM_HOME
+export PATH=$PATH:$MICROPY_HOME
+export MICROPY_MICROPYTHON=$MICROPY_HOME/micropython
+export MICROPYPATH=$MPPORT_HOME:$MPOC_LIB
 
 ./run build!
 

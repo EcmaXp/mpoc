@@ -1,6 +1,8 @@
 #!/bin/bash
 
-export LAUNCHER_HOME="/home/ubuntu/workspace/mpoc-machine"
+echo "half-launcher"
+
+export LAUNCHER_HOME="$( dirname ${BASH_SOURCE[0]})"
 export LAUNCHER_ENV="$LAUNCHER_HOME/env"
 
 export JYTHON_HOME="$LAUNCHER_ENV/jython2.7"
@@ -24,13 +26,13 @@ export OPENCOM_JNLUA_JAR="$OPENCOM_HOME/OpenComputers-JNLua.jar"
 export OPENCOM_LUAJ_JAR="$OPENCOM_HOME/OpenComputers-LuaJ.jar"
 export OPENCOM_NATIVE_LIB="$OPENCOM_HOME/lib/native.64.so"
 
-export MPOC_ROM="$LAUNCHER_ENV/../mpoc-rom"
+export MPOC_ROM="$LAUNCHER_HOME/../../mpoc-rom"
 
 export JAVACMD=$JAVA_HOME/bin/java
 export JAVA_MEM="-Xmx64m -Xms32m"
 export JAVA_OPTS='-Dscala.home="$SCALA_HOME"'
 
-CLASSPATH="`./classpath.py $FORGE_LIB`"
+CLASSPATH="`$LAUNCHER_HOME/classpath.py $FORGE_LIB`"
 CLASSPATH+=":$FORGE_JAR"
 CLASSPATH+=":$MC_SERVER_JAR"
 CLASSPATH+=":$OPENCOM_JAR"

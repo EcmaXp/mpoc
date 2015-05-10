@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo "mini-launcher"
+
+export LAUNCHER_HOME="$( dirname ${BASH_SOURCE[0]})"
+export MPOC_ROM="$LAUNCHER_HOME/../rom"
+
+cd $LAUNCHER_HOME
+./launch.py
