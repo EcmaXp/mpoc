@@ -1,4 +1,11 @@
 
+from . import gen_sysfunc
+sysfunc = gen_sysfunc(__name__)
 
-def hello():
-    return 32
+@sysfunc
+def hello(ret):
+    return ret
+    
+@sysfunc
+def hello2(ret):
+    return "?" + repr(ret)
