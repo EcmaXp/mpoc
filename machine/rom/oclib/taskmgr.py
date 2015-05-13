@@ -64,5 +64,5 @@ def run(bios):
             next_thread = bios
         
         thread = next_thread
-        utime.sleep(0.25)
+        utime.sleep(0.05)
     

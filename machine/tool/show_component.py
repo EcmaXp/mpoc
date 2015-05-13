@@ -96,6 +96,11 @@ for path, folders, files in os.walk(path):
                     arg = arg.replace(":", "="+emptydef.get(argtype, argtype + "()")+":")
                     args += sep + arg + left_args
                 
+                if args:
+                    args = "self, context:Context, " + args
+                else:
+                    args = "self, context:Context"
+                
                 func = func.replace("context: Context, args: Arguments", args)
                 
                 if ret:
