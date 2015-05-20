@@ -2,18 +2,22 @@
 
 echo "half-launcher"
 
-export LAUNCHER_HOME="$( dirname ${BASH_SOURCE[0]})"
+export LAUNCHER_HOME="$HOME/workspace/machine/half"
+# "$( dirname ${BASH_SOURCE[0]})"
 export LAUNCHER_ENV="$LAUNCHER_HOME/env"
+
+export PROJECT_HOME="$LAUNCHER_HOME/../.."
+
+export VIRTUAL_HOME="$LAUNCHER_HOME/virtual"
+export VIRTUAL_SRC="$VIRTUAL_HOME/src"
+export VIRTUAL_SRC_BUILD="$VIRTUAL_HOME/src_build"
+export VIRTUAL_BUILD="$VIRTUAL_HOME/build"
+export VIRTUAL_MANIFEST="$VIRTUAL_HOME/manifest"
+export VIRTUAL_JAR="$VIRTUAL_HOME/virtual.jar"
 
 export JYTHON_HOME="$LAUNCHER_ENV/jython2.7"
 export JAVA_HOME="$LAUNCHER_ENV/jdk1.8.0_45"
 export SCALA_HOME="$LAUNCHER_ENV/scala-2.11.6"
-
-export VIRTUAL_HOME="$LAUNCHER_ENV/virtual"
-export VIRTUAL_SRC="$VIRTUAL_HOME/src"
-export VIRTUAL_BUILD="$VIRTUAL_HOME/build"
-export VIRTUAL_MANIFEST="$VIRTUAL_HOME/manifest"
-export VIRTUAL_JAR="$VIRTUAL_HOME/virtual.jar"
 
 export FORGE_HOME="$LAUNCHER_ENV/forge-1.7.10"
 export FORGE_LIB="$FORGE_HOME/libraries"
@@ -26,11 +30,18 @@ export OPENCOM_JNLUA_JAR="$OPENCOM_HOME/OpenComputers-JNLua.jar"
 export OPENCOM_LUAJ_JAR="$OPENCOM_HOME/OpenComputers-LuaJ.jar"
 export OPENCOM_NATIVE_LIB="$OPENCOM_HOME/lib/native.64.so"
 
-export MPOC_ROM="$LAUNCHER_HOME/../../mpoc-rom"
+export MICROPYTHON_HOME="$PROJECT_HOME/micropython"
+export MICROPYTHON_PORT="opencom"
+export MICROPYTHON_PORT_HOME="$MICROPYTHON_HOME/$MICROPYTHON_PORT"
+export MICROPYTHON_PORT_LIB_NAME="libmicropython.so"
+export MICROPYTHON_PORT_LIB="$MICROPYTHON_PORT_HOME/$MICROPYTHON_PORT_LIB_NAME"
+export MICROPYTHON_JAVA_SRC="$MICROPYTHON_HOME/java"
+
+export MPOC_ROM="$PROJECT_HOME/mpoc-rom"
 
 export JAVACMD=$JAVA_HOME/bin/java
 export JAVA_MEM="-Xmx64m -Xms32m"
-export JAVA_OPTS='-Dscala.home="$SCALA_HOME"'
+export JAVA_OPTS='-Dscala.home="$SCALA_HOME" -Djava.library.path=$PROJECT_HOME'
 
 CLASSPATH="`$LAUNCHER_HOME/classpath.py $FORGE_LIB`"
 CLASSPATH+=":$FORGE_JAR"
@@ -41,23 +52,40 @@ CLASSPATH+=":$OPENCOM_LUAJ_JAR"
 
 export CLASSPATH=$CLASSPATH
 
-touch $VIRTUAL_BUILD
-rm -r $VIRTUAL_BUILD
+rm -rf $VIRTUAL_SRC_BUILD
+mkdir $VIRTUAL_SRC_BUILD
+
+rm -rf $VIRTUAL_BUILD
 mkdir $VIRTUAL_BUILD
 
-echo "comileing java"
-find $VIRTUAL_SRC -name "*.java" | xargs $JAVA_HOME/bin/javac -classpath $CLASSPATH -d $VIRTUAL_BUILD
+cp -r $VIRTUAL_SRC/* $VIRTUAL_SRC_BUILD
+cp -r $MICROPYTHON_JAVA_SRC/* $VIRTUAL_SRC_BUILD
+
+echo "compile *.java"
+find $VIRTUAL_SRC_BUILD -name "*.java" | xargs $JAVA_HOME/bin/javac -classpath $CLASSPATH -d $VIRTUAL_BUILD
 if [[ $? != 0 ]]; then exit 1; fi
 
-echo "comileing scala"
-find $VIRTUAL_SRC -name "*.scala" | xargs $SCALA_HOME/bin/scalac -classpath $CLASSPATH -d $VIRTUAL_BUILD
+echo "compile *.scala"
+find $VIRTUAL_SRC_BUILD -name "*.scala" | xargs $SCALA_HOME/bin/scalac -classpath $CLASSPATH -d $VIRTUAL_BUILD
 if [[ $? != 0 ]]; then exit 1; fi
 
-echo "building jar"
+echo "package jar"
 $JAVA_HOME/bin/jar cf $VIRTUAL_JAR $VIRTUAL_MANIFEST -C $VIRTUAL_BUILD .
 if [[ $? != 0 ]]; then exit 1; fi
+
+cd $MICROPYTHON_PORT_HOME
+echo "compile $MICROPYTHON_PORT_LIB_NAME"
+make clean
+MICROPY_BUILD_JNI_LIBRARY=1 make
+if [[ $? != 0 ]]; then exit 1; fi
+
+cp $MICROPYTHON_PORT_LIB $LAUNCHER_HOME/$MICROPYTHON_PORT_LIB_NAME
+cd $LAUNCHER_HOME
 
 export CLASSPATH="$VIRTUAL_JAR:$CLASSPATH"
 
 echo "execute jython"
 $JYTHON_HOME/bin/jython ./launch.py $MPOC_ROM/bios.py
+
+# TODO: should derease memory usage for
+#       pass the "Memory limit hit" in c9 micro workspace

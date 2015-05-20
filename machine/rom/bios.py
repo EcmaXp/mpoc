@@ -2,7 +2,6 @@ import sys
 from sys import exit
 
 __path__ = __file__.rpartition("/")[0]
-print(sys.path)
 sys.path.extend([
     ".",
     __path__,
@@ -39,4 +38,4 @@ taskmgr.run(bios)
 
 import gc
 print(gc.collect())
-print(gc.mem_alloc(), gc.mem_free(), '/', gc.mem_alloc() + gc.mem_free(), "KB")
+print(gc.mem_alloc(), '/', gc.mem_alloc() + gc.mem_free(), "KB")

@@ -3,7 +3,7 @@ __all__ = ["pause", "call"]
 
 import sys
 import microthread
-from microthread import pause as _pause, auto
+from microthread import pause as _pause, auto, current_thread
 from microthread import STATUS_NORMAL, STATUS_YIELD, STATUS_EXCEPTION, \
     STATUS_LIMIT, STATUS_PAUSE, STATUS_FORCE_PAUSE, STATUS_STOP, \
     LIMIT_SOFT, LIMIT_HARD
@@ -65,4 +65,3 @@ def run(bios):
         
         thread = next_thread
         utime.sleep(0.05)
-    
