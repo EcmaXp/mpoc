@@ -10,6 +10,7 @@ import glob
 
 if platform.system() != "Java":
     exit("error: not running from java")
+print(sys.argv[1])
 
 from java.lang import System
 
@@ -29,18 +30,32 @@ MPOC_ROM = get_absenv("MPOC_ROM")
 try:
     import li.cil.oc
 except ImportError:
-    exit("error: import OpenCom is failed")
+    print("warn: import OpenCom is failed")
 
 try:
     from kr.pe.ecmaxp.mpoc.virtual import JNLuaPreloader
     JNLuaPreloader().init()
 except:
-    print("error: init JNLua are failed")
-    raise
+    print("warn: init JNLua are failed")
 
-from li.cil.oc.util import LuaStateFactory
-lua = LuaStateFactory.createState().x()
+try:
+    from li.cil.repack.com.naef.jnlua import LuaState
+except:
+    print("warn: init LuaState are failed")
+
+try:
+    from kr.pe.ecmaxp.micropython import PythonState
+except:
+    print("warn: init PythonState are failed")
+
+try:
+    luastate = LuaState()
+except:
+    print('warn: make LuaState are failed')
+
+try:
+    pystate = PythonState()
+except:
+    print("warn: make PythonState are failed")
 
 import code; code.interact(None, raw_input, globals())
-
-print(sys.argv[1])

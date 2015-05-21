@@ -1,12 +1,12 @@
 #!/bin/bash
+# -x
 
 echo "half-launcher"
 
-export LAUNCHER_HOME="$HOME/workspace/machine/half"
-# "$( dirname ${BASH_SOURCE[0]})"
-export LAUNCHER_ENV="$LAUNCHER_HOME/env"
+export PROJECT_HOME="$HOME/workspace"
 
-export PROJECT_HOME="$LAUNCHER_HOME/../.."
+export LAUNCHER_HOME="$PROJECT_HOME/machine/half" # "$( dirname ${BASH_SOURCE[0]})"
+export LAUNCHER_ENV="$LAUNCHER_HOME/env"
 
 export VIRTUAL_HOME="$LAUNCHER_HOME/virtual"
 export VIRTUAL_SRC="$VIRTUAL_HOME/src"
@@ -33,14 +33,17 @@ export OPENCOM_NATIVE_LIB="$OPENCOM_HOME/lib/native.64.so"
 export MICROPYTHON_HOME="$PROJECT_HOME/micropython"
 export MICROPYTHON_PORT="opencom"
 export MICROPYTHON_PORT_HOME="$MICROPYTHON_HOME/$MICROPYTHON_PORT"
+export MICROPYTHON_PORT_EXE_NAME="micropython"
+export MICROPYTHON_PORT_EXE="$MICROPYTHON_PORT_HOME/$MICROPYTHON_PORT_EXE_NAME"
 export MICROPYTHON_PORT_LIB_NAME="libmicropython.so"
 export MICROPYTHON_PORT_LIB="$MICROPYTHON_PORT_HOME/$MICROPYTHON_PORT_LIB_NAME"
 export MICROPYTHON_JAVA_SRC="$MICROPYTHON_HOME/java"
+export MICROPYTHON_LIB="$LAUNCHER_HOME/$MICROPYTHON_PORT_LIB_NAME"
 
-export MPOC_ROM="$PROJECT_HOME/mpoc-rom"
+export MPOC_ROM="$PROJECT_HOME/machine/rom"
 
 export JAVACMD=$JAVA_HOME/bin/java
-export JAVA_MEM="-Xmx64m -Xms32m"
+export JAVA_MEM="-Xmx128m -Xms32m"
 export JAVA_OPTS='-Dscala.home="$SCALA_HOME" -Djava.library.path=$PROJECT_HOME'
 
 CLASSPATH="`$LAUNCHER_HOME/classpath.py $FORGE_LIB`"
@@ -61,13 +64,15 @@ mkdir $VIRTUAL_BUILD
 cp -r $VIRTUAL_SRC/* $VIRTUAL_SRC_BUILD
 cp -r $MICROPYTHON_JAVA_SRC/* $VIRTUAL_SRC_BUILD
 
+export CLASSPATH="$OPENCOM_JNLUA_JAR"
+
 echo "compile *.java"
 find $VIRTUAL_SRC_BUILD -name "*.java" | xargs $JAVA_HOME/bin/javac -classpath $CLASSPATH -d $VIRTUAL_BUILD
 if [[ $? != 0 ]]; then exit 1; fi
 
-echo "compile *.scala"
-find $VIRTUAL_SRC_BUILD -name "*.scala" | xargs $SCALA_HOME/bin/scalac -classpath $CLASSPATH -d $VIRTUAL_BUILD
-if [[ $? != 0 ]]; then exit 1; fi
+# echo "compile *.scala"
+# find $VIRTUAL_SRC_BUILD -name "*.scala" | xargs $SCALA_HOME/bin/scalac -classpath $CLASSPATH -d $VIRTUAL_BUILD
+# if [[ $? != 0 ]]; then exit 1; fi
 
 echo "package jar"
 $JAVA_HOME/bin/jar cf $VIRTUAL_JAR $VIRTUAL_MANIFEST -C $VIRTUAL_BUILD .
@@ -75,14 +80,20 @@ if [[ $? != 0 ]]; then exit 1; fi
 
 cd $MICROPYTHON_PORT_HOME
 echo "compile $MICROPYTHON_PORT_LIB_NAME"
-make clean
+if [ -e $MICROPYTHON_PORT_EXE ]; then make clean; fi
+
 MICROPY_BUILD_JNI_LIBRARY=1 make
 if [[ $? != 0 ]]; then exit 1; fi
 
-cp $MICROPYTHON_PORT_LIB $LAUNCHER_HOME/$MICROPYTHON_PORT_LIB_NAME
+cp $MICROPYTHON_PORT_LIB $MICROPYTHON_LIB
 cd $LAUNCHER_HOME
 
-export CLASSPATH="$VIRTUAL_JAR:$CLASSPATH"
+export CLASSPATH="$VIRTUAL_JAR"
+# CLASSPATH+=":$CLASSPATH"
+# CLASSPATH+=":$SCALA_HOME/lib/*"
+# CLASSPATH+=":$OPENCOM_JAR"
+CLASSPATH+=":$OPENCOM_JNLUA_JAR"
+# CLASSPATH+=":$OPENCOM_LUAJ_JAR"
 
 echo "execute jython"
 $JYTHON_HOME/bin/jython ./launch.py $MPOC_ROM/bios.py
