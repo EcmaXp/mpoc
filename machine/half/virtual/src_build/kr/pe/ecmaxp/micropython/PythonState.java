@@ -33,6 +33,15 @@ public class PythonState {
 		// MICROPYTHON_VERSION = mp_version();
 	}
 	
+	public static void main(String args[]) {
+		PythonState py = new PythonState();
+		py.mp_test_jni_state();		
+		//py.mp_test_jni();
+		//py.mp_state_new();
+		//py.mp_state_new();
+		//py.mp_module_new("print(3)");
+	}
+	
 	public static final int APIVERSION = 1;
 	
 	public PythonState() {
@@ -45,5 +54,16 @@ public class PythonState {
 		System.out.println("hello from java2");
 	}
 	
-	public static native void mp_test_jni();
+	// TODO: public as private (until test done?)
+	// TODO: build this first, and define in jnupy.c later
+	// this is native function list
+	
+	public native void mp_test_jni();
+	public native void mp_test_jni_state();
+	public native void mp_test_jni_fail();
+	public native boolean mp_state_new();
+	public native boolean mp_state_free();
+	public native boolean mp_state_exist();
+	public native boolean mp_state_check();
+	public native boolean mp_code_exec(String nope);
 }

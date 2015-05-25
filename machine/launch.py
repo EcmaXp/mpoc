@@ -2,6 +2,7 @@
 
 import sys
 import os
+import subprocess
 
 def main():
     if len(sys.argv) < 2:
@@ -11,9 +12,7 @@ def main():
     if mode not in ("full", "half", "mini"):
         exit("error: mode is invaild")
     
-    assert not args
-    
-    os.system(os.path.join(mode, "launch"))
+    subprocess.call([os.path.join(mode, "launch")] + args)
 
 if __name__ == "__main__":
     main()

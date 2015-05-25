@@ -66,6 +66,14 @@ cp -r $MICROPYTHON_JAVA_SRC/* $VIRTUAL_SRC_BUILD
 
 export CLASSPATH="$OPENCOM_JNLUA_JAR"
 
+if [[ "$1" == "shell*" ]]
+then
+    echo "<mpoc/half/env shell>"
+    bash
+    echo "<exit>"
+    exit
+fi
+
 echo "compile *.java"
 find $VIRTUAL_SRC_BUILD -name "*.java" | xargs $JAVA_HOME/bin/javac -classpath $CLASSPATH -d $VIRTUAL_BUILD
 if [[ $? != 0 ]]; then exit 1; fi
@@ -95,8 +103,26 @@ export CLASSPATH="$VIRTUAL_JAR"
 CLASSPATH+=":$OPENCOM_JNLUA_JAR"
 # CLASSPATH+=":$OPENCOM_LUAJ_JAR"
 
-echo "execute jython"
-$JYTHON_HOME/bin/jython ./launch.py $MPOC_ROM/bios.py
+if [[ "$1" == "fast" ]]
+then
+    echo "execute PythonState's main"
+    $JAVA_HOME/bin/java kr.pe.ecmaxp.micropython.PythonState $MPOC_ROM/bios.py
+elif [[ "$1" == "slow" ]]
+then
+    echo "execute jython"
+    $JYTHON_HOME/bin/jython ./launch.py $MPOC_ROM/bios.py
+elif [[ "$1" == "shell" ]]
+then
+    BACKUP_PS1="$PS1"
+    export PS1="$PS1 [mpoc/half]"
+    bash
+    export PS1="$BACKUP_PS1"
+else
+    echo "usage: ./launch half <opt=(fast,slow,shell,shell*)>"
+fi
 
 # TODO: should derease memory usage for
 #       pass the "Memory limit hit" in c9 micro workspace
+
+# http://stackoverflow.com/questions/7938402/terminal-in-broken-state-invisible-text-no-echo-after-exit-during-input
+stty sane

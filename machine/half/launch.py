@@ -49,12 +49,17 @@ except:
     print("warn: init PythonState are failed")
 
 try:
-    luastate = LuaState()
+    lua = LuaState()
 except:
     print('warn: make LuaState are failed')
 
 try:
-    pystate = PythonState()
+    _glob = globals()
+    py = PythonState()
+    for name in dir(py):
+        if name.startswith("mp_"):
+            _glob[name] = getattr(py, name)
+    del _glob
 except:
     print("warn: make PythonState are failed")
 
