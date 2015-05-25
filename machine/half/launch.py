@@ -44,7 +44,7 @@ except:
     print("warn: init LuaState are failed")
 
 try:
-    from kr.pe.ecmaxp.micropython import PythonState
+    from org.micropython.jnupy import PythonState
 except:
     print("warn: init PythonState are failed")
 

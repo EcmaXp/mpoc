@@ -106,7 +106,8 @@ CLASSPATH+=":$OPENCOM_JNLUA_JAR"
 if [[ "$1" == "fast" ]]
 then
     echo "execute PythonState's main"
-    $JAVA_HOME/bin/java kr.pe.ecmaxp.micropython.PythonState $MPOC_ROM/bios.py
+    $JAVA_HOME/bin/java org.micropython.jnupy.PythonState $MPOC_ROM/bios.py
+    if [[ $? == 1 ]]; then $JAVA_HOME/bin/javap -s org.micropython.jnupy.PythonState; fi
 elif [[ "$1" == "slow" ]]
 then
     echo "execute jython"
