@@ -30,6 +30,9 @@ export OPENCOM_JNLUA_JAR="$OPENCOM_HOME/OpenComputers-JNLua.jar"
 export OPENCOM_LUAJ_JAR="$OPENCOM_HOME/OpenComputers-LuaJ.jar"
 export OPENCOM_NATIVE_LIB="$OPENCOM_HOME/lib/native.64.so"
 
+export MSGPACK_HOME="$LAUNCHER_ENV/msgpack-java"
+export MSGPACK_JAR="$MSGPACK_HOME/msgpack-0.6.12.jar"
+
 export MICROPYTHON_HOME="$PROJECT_HOME/micropython"
 export MICROPYTHON_PORT="opencom"
 export MICROPYTHON_PORT_HOME="$MICROPYTHON_HOME/$MICROPYTHON_PORT"
@@ -52,19 +55,15 @@ CLASSPATH+=":$MC_SERVER_JAR"
 CLASSPATH+=":$OPENCOM_JAR"
 CLASSPATH+=":$OPENCOM_JNLUA_JAR"
 CLASSPATH+=":$OPENCOM_LUAJ_JAR"
+CLASSPATH+=":$MSGPACK_JAR"
 
 export CLASSPATH=$CLASSPATH
-
-rm -rf $VIRTUAL_SRC_BUILD
-mkdir $VIRTUAL_SRC_BUILD
 
 rm -rf $VIRTUAL_BUILD
 mkdir $VIRTUAL_BUILD
 
-cp -r $VIRTUAL_SRC/* $VIRTUAL_SRC_BUILD
-cp -r $MICROPYTHON_JAVA_SRC/* $VIRTUAL_SRC_BUILD
-
 export CLASSPATH="$OPENCOM_JNLUA_JAR"
+CLASSPATH+=":$MSGPACK_JAR"
 
 if [[ "$1" == "shell*" ]]
 then
@@ -75,7 +74,10 @@ then
 fi
 
 echo "compile *.java"
-find $VIRTUAL_SRC_BUILD -name "*.java" | xargs $JAVA_HOME/bin/javac -classpath $CLASSPATH -d $VIRTUAL_BUILD
+find $VIRTUAL_SRC -name "*.java" | xargs $JAVA_HOME/bin/javac -classpath $CLASSPATH -d $VIRTUAL_BUILD
+if [[ $? != 0 ]]; then exit 1; fi
+
+find $MICROPYTHON_JAVA_SRC -name "*.java" | xargs $JAVA_HOME/bin/javac -classpath $CLASSPATH -d $VIRTUAL_BUILD
 if [[ $? != 0 ]]; then exit 1; fi
 
 # echo "compile *.scala"
@@ -90,10 +92,11 @@ cd $MICROPYTHON_PORT_HOME
 echo "compile $MICROPYTHON_PORT_LIB_NAME"
 if [ -e $MICROPYTHON_PORT_EXE ]; then make clean; fi
 
-MICROPY_BUILD_JNI_LIBRARY=1 make
+DEBUG=1 MICROPY_BUILD_JNI_LIBRARY=1 make
 if [[ $? != 0 ]]; then exit 1; fi
 
 cp $MICROPYTHON_PORT_LIB $MICROPYTHON_LIB
+cp "$MICROPYTHON_PORT_LIB.map" "$MICROPYTHON_LIB_MAP.map"
 cd $LAUNCHER_HOME
 
 export CLASSPATH="$VIRTUAL_JAR"
@@ -102,6 +105,7 @@ export CLASSPATH="$VIRTUAL_JAR"
 # CLASSPATH+=":$OPENCOM_JAR"
 CLASSPATH+=":$OPENCOM_JNLUA_JAR"
 # CLASSPATH+=":$OPENCOM_LUAJ_JAR"
+CLASSPATH+=":$MSGPACK_JAR"
 
 if [[ "$1" == "fast" ]]
 then
@@ -121,9 +125,6 @@ then
 else
     echo "usage: ./launch half <opt=(fast,slow,shell,shell*)>"
 fi
-
-# TODO: should derease memory usage for
-#       pass the "Memory limit hit" in c9 micro workspace
 
 # http://stackoverflow.com/questions/7938402/terminal-in-broken-state-invisible-text-no-echo-after-exit-during-input
 stty sane
