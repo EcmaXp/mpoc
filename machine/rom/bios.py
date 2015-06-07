@@ -12,7 +12,15 @@ sys.path.extend([
 import utime
 import microthread
 
-import mpoc
+import jnupy
+
+print(sys.argv)
+
+###
+from code import interact
+interact()
+####
+
 import utime
 
 from taskmgr import *
@@ -22,6 +30,8 @@ from opencom import syscall
 
 def hello(t:int) -> int:
     pass
+
+print(hello)
 
 @taskmgr.auto()
 def bios():
@@ -39,3 +49,6 @@ taskmgr.run(bios)
 import gc
 print(gc.collect())
 print(gc.mem_alloc(), '/', gc.mem_alloc() + gc.mem_free(), "KB")
+
+def main():
+    pass

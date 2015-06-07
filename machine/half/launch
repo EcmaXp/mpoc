@@ -41,6 +41,7 @@ export MICROPYTHON_PORT_EXE="$MICROPYTHON_PORT_HOME/$MICROPYTHON_PORT_EXE_NAME"
 export MICROPYTHON_PORT_LIB_NAME="libmicropython.so"
 export MICROPYTHON_PORT_LIB="$MICROPYTHON_PORT_HOME/$MICROPYTHON_PORT_LIB_NAME"
 export MICROPYTHON_JAVA_SRC="$MICROPYTHON_HOME/java"
+export MICROPYTHON_BATTERY="$MICROPYTHON_PORT_HOME/lib"
 export MICROPYTHON_LIB="$LAUNCHER_HOME/$MICROPYTHON_PORT_LIB_NAME"
 
 export MPOC_ROM="$PROJECT_HOME/machine/rom"
@@ -73,30 +74,34 @@ then
     exit
 fi
 
-echo "compile *.java"
-find $VIRTUAL_SRC -name "*.java" | xargs $JAVA_HOME/bin/javac -classpath $CLASSPATH -d $VIRTUAL_BUILD
-if [[ $? != 0 ]]; then exit 1; fi
+if [[ "$1" != "fastest" ]]
+then
+    echo "compile *.java"
+    find $VIRTUAL_SRC -name "*.java" | xargs $JAVA_HOME/bin/javac -classpath $CLASSPATH -d $VIRTUAL_BUILD
+    if [[ $? != 0 ]]; then exit 1; fi
+    
+    find $MICROPYTHON_JAVA_SRC -name "*.java" | xargs $JAVA_HOME/bin/javac -classpath $CLASSPATH -d $VIRTUAL_BUILD
+    if [[ $? != 0 ]]; then exit 1; fi
+    
+    # echo "compile *.scala"
+    # find $VIRTUAL_SRC_BUILD -name "*.scala" | xargs $SCALA_HOME/bin/scalac -classpath $CLASSPATH -d $VIRTUAL_BUILD
+    # if [[ $? != 0 ]]; then exit 1; fi
+    
+    echo "package jar"
+    $JAVA_HOME/bin/jar cf $VIRTUAL_JAR $VIRTUAL_MANIFEST -C $VIRTUAL_BUILD .
+    if [[ $? != 0 ]]; then exit 1; fi
+    
+    cd $MICROPYTHON_PORT_HOME
+    echo "compile $MICROPYTHON_PORT_LIB_NAME"
+    if [ -e $MICROPYTHON_PORT_EXE ]; then make clean; fi
+    
+    DEBUG=1 MICROPY_BUILD_JNI_LIBRARY=1 make
+    if [[ $? != 0 ]]; then exit 1; fi
+    
+    cp $MICROPYTHON_PORT_LIB $MICROPYTHON_LIB
+    cp "$MICROPYTHON_PORT_LIB.map" "$MICROPYTHON_LIB_MAP.map"
+fi
 
-find $MICROPYTHON_JAVA_SRC -name "*.java" | xargs $JAVA_HOME/bin/javac -classpath $CLASSPATH -d $VIRTUAL_BUILD
-if [[ $? != 0 ]]; then exit 1; fi
-
-# echo "compile *.scala"
-# find $VIRTUAL_SRC_BUILD -name "*.scala" | xargs $SCALA_HOME/bin/scalac -classpath $CLASSPATH -d $VIRTUAL_BUILD
-# if [[ $? != 0 ]]; then exit 1; fi
-
-echo "package jar"
-$JAVA_HOME/bin/jar cf $VIRTUAL_JAR $VIRTUAL_MANIFEST -C $VIRTUAL_BUILD .
-if [[ $? != 0 ]]; then exit 1; fi
-
-cd $MICROPYTHON_PORT_HOME
-echo "compile $MICROPYTHON_PORT_LIB_NAME"
-if [ -e $MICROPYTHON_PORT_EXE ]; then make clean; fi
-
-DEBUG=1 MICROPY_BUILD_JNI_LIBRARY=1 make
-if [[ $? != 0 ]]; then exit 1; fi
-
-cp $MICROPYTHON_PORT_LIB $MICROPYTHON_LIB
-cp "$MICROPYTHON_PORT_LIB.map" "$MICROPYTHON_LIB_MAP.map"
 cd $LAUNCHER_HOME
 
 export CLASSPATH="$VIRTUAL_JAR"
@@ -107,11 +112,12 @@ CLASSPATH+=":$OPENCOM_JNLUA_JAR"
 # CLASSPATH+=":$OPENCOM_LUAJ_JAR"
 CLASSPATH+=":$MSGPACK_JAR"
 
-if [[ "$1" == "fast" ]]
+if [[ "$1" == "fast" || "$1" == "fastest" ]]
 then
     echo "execute PythonState's main"
-    $JAVA_HOME/bin/java org.micropython.jnupy.PythonState $MPOC_ROM/bios.py
-    if [[ $? == 1 ]]; then $JAVA_HOME/bin/javap -s org.micropython.jnupy.PythonState; fi
+    shift
+    $JAVA_HOME/bin/java org.micropython.jnupy.PythonState $MPOC_ROM/bios.py $@
+    if [[ $? == 1 ]]; then $JAVA_HOME/bin/javap -s org.micropython.jnupy.PythonNativeState; fi
 elif [[ "$1" == "slow" ]]
 then
     echo "execute jython"
