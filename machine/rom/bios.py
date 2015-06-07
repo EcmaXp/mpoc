@@ -9,17 +9,28 @@ sys.path.extend([
     __path__ + "/pylib",
 ])
 
+if len(sys.argv) == 1:
+    from code import interact
+    interact()
+else:
+    # ('<java>', '-X', 'emit=bytecode', 'basics/0prelim.py')
+    if sys.argv[1:3] == ("-X", 'emit=bytecode'):
+        sys.argv = (sys.argv[0],) + sys.argv[3:]
+    import jnupy
+    try:
+        content = jnupy.readfile(sys.argv[1])
+    except Exception as e:
+        print('reading file {!r} failed'.format(sys.argv[1]))
+        print(e)
+        exit(1)
+    sys.argv = sys.argv[1:]
+    exec(content)
+    exit()
+
 import utime
 import microthread
 
 import jnupy
-
-print(sys.argv)
-
-###
-from code import interact
-interact()
-####
 
 import utime
 

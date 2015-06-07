@@ -75,7 +75,7 @@ def interact(banner=None, readfunc=None, local=None):
         local = dict()
 
     if banner is None:
-        banner = ""
+        banner = "Micro Python; {} version".format(sys.platform)
         # mp_hal_stdout_tx_str("Micro Python " MICROPY_GIT_TAG " on " MICROPY_BUILD_DATE "; " MICROPY_PY_SYS_PLATFORM " version\n");
     
     print(banner)
