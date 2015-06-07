@@ -12,6 +12,10 @@ sys.path.extend([
 if len(sys.argv) == 1:
     from code import interact
     interact()
+    print()
+    exit()
+elif sys.argv[1] == __file__:
+    pass
 else:
     # ('<java>', '-X', 'emit=bytecode', 'basics/0prelim.py')
     if sys.argv[1:3] == ("-X", 'emit=bytecode'):

@@ -62,22 +62,16 @@ def mp_repl_continue_with_input(line):
     # otherwise, don't continue
     return False
 
-try:
-    compile("?", "", "single")
-except:
-    SyntexError = sys.exc_info()[0]
-
 def interact(banner=None, readfunc=None, local=None):
     if readfunc is None:
         readfunc = input
 
+    if banner is None:
+        banner = "Micro Python {} on {}; {} version".format(jnupy.get_version("MICROPY_GIT_TAG"), jnupy.get_version("MICROPY_BUILD_DATE"), sys.platform)
+
     if local is None:
         local = dict()
 
-    if banner is None:
-        banner = "Micro Python; {} version".format(sys.platform)
-        # mp_hal_stdout_tx_str("Micro Python " MICROPY_GIT_TAG " on " MICROPY_BUILD_DATE "; " MICROPY_PY_SYS_PLATFORM " version\n");
-    
     print(banner)
     
     while True:
@@ -94,7 +88,7 @@ def interact(banner=None, readfunc=None, local=None):
     
         try:
             fun = compile(code, "<stdin>", "single")
-        except SyntexError:
+        except SyntaxError:
             sys.print_exception(sys.exc_info()[1])
             continue
         
