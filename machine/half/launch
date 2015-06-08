@@ -34,9 +34,6 @@ then
     find $VIRTUAL_SRC -name "*.java" | xargs $JAVA_HOME/bin/javac -classpath $CLASSPATH -d $VIRTUAL_BUILD
     if [[ $? != 0 ]]; then exit 1; fi
     
-    find $MICROPYTHON_JAVA_SRC -name "*.java" | xargs $JAVA_HOME/bin/javac -classpath $CLASSPATH -d $VIRTUAL_BUILD
-    if [[ $? != 0 ]]; then exit 1; fi
-    
     # echo "compile *.scala"
     # find $VIRTUAL_SRC_BUILD -name "*.scala" | xargs $SCALA_HOME/bin/scalac -classpath $CLASSPATH -d $VIRTUAL_BUILD
     # if [[ $? != 0 ]]; then exit 1; fi
@@ -63,6 +60,7 @@ export CLASSPATH="$VIRTUAL_JAR"
 CLASSPATH+=":$OPENCOM_JNLUA_JAR"
 # CLASSPATH+=":$OPENCOM_LUAJ_JAR"
 CLASSPATH+=":$MSGPACK_JAR"
+CLASSPATH+=":$MICROPYTHON_JAR"
 
 if [[ "$1" == "fast" || "$1" == "fastest" ]]
 then

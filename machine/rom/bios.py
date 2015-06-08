@@ -1,35 +1,17 @@
 import sys
 from sys import exit
+import jnupy
 
+# TODO: move bios.py to micropython/opencom/main.py
 __path__ = __file__.rpartition("/")[0]
 sys.path.extend([
     ".",
     __path__,
     __path__ + "/oclib",
     __path__ + "/pylib",
+    jnupy.getenv("MPOC_ROM"),
+    jnupy.getenv("MICROPYTHON_BATTERY"),
 ])
-
-if len(sys.argv) == 1:
-    from code import interact
-    interact()
-    print()
-    exit()
-elif sys.argv[1] == __file__:
-    pass
-else:
-    # ('<java>', '-X', 'emit=bytecode', 'basics/0prelim.py')
-    if sys.argv[1:3] == ("-X", 'emit=bytecode'):
-        sys.argv = (sys.argv[0],) + sys.argv[3:]
-    import jnupy
-    try:
-        content = jnupy.readfile(sys.argv[1])
-    except Exception as e:
-        print('reading file {!r} failed'.format(sys.argv[1]))
-        print(e)
-        exit(1)
-    sys.argv = sys.argv[1:]
-    exec(content)
-    exit()
 
 import utime
 import microthread

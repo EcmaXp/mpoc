@@ -37,9 +37,9 @@ export MICROPYTHON_PORT_EXE_NAME="micropython"
 export MICROPYTHON_PORT_EXE="$MICROPYTHON_PORT_HOME/$MICROPYTHON_PORT_EXE_NAME"
 export MICROPYTHON_PORT_LIB_NAME="libmicropython.so"
 export MICROPYTHON_PORT_LIB="$MICROPYTHON_PORT_HOME/$MICROPYTHON_PORT_LIB_NAME"
-export MICROPYTHON_JAVA_SRC="$MICROPYTHON_HOME/java"
 export MICROPYTHON_BATTERY="$MICROPYTHON_PORT_HOME/lib"
 export MICROPYTHON_LIB="$LAUNCHER_HOME/$MICROPYTHON_PORT_LIB_NAME"
+export MICROPYTHON_JAR="$MICROPYTHON_PORT_HOME/micropython.jar"
 
 export MPOC_ROM="$PROJECT_HOME/machine/rom"
 
@@ -47,6 +47,6 @@ export JAVACMD=$JAVA_HOME/bin/java
 export JAVA_MEM="-Xmx128m -Xms32m"
 export JAVA_OPTS='-Dscala.home="$SCALA_HOME" -Djava.library.path=$PROJECT_HOME'
 
-export MPOC_LAUNCH="$JAVA_HOME/bin/java org.micropython.jnupy.PythonState"
+export MPOC_LAUNCH="$JAVACMD org.micropython.jnupy.PythonState"
 
 export CLASSPATH="$VIRTUAL_JAR"
