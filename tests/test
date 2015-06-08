@@ -7,25 +7,11 @@ abspath() {
 }
 
 export MPOC_ROOT=$( abspath ".." )
-
 export MICROPY_HOME=$MPOC_ROOT/micropython/opencom
-export MPOC_LIB=$MPOC_ROOT/machine/lib
-
-export PATH=$PATH:$MICROPY_HOME
 export MICROPY_MICROPYTHON=$MICROPY_HOME/micropython
-export MICROPYPATH=$MPPORT_HOME:$MPOC_LIB
+export PATH=$PATH:$MICROPY_HOME
 
-./run build!
-
-cd tests
-touch ./_.py.exp
-rm ./*.py.exp
 touch ./_.py.out
-rm ./*.py.out
+rm -r ./*.py.out
 
 $MPOC_ROOT/micropython/tests/run-tests-exp.sh opencom/*.py
-
-# TODO: if noting failed then execute real run-test?
-
-# cd $MPOC_ROOT/micropython/tests
-# ./run-tests
