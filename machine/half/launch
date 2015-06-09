@@ -48,7 +48,6 @@ then
     if [[ $? != 0 ]]; then exit 1; fi
     
     cp $MICROPYTHON_PORT_LIB $MICROPYTHON_LIB
-    cp "$MICROPYTHON_PORT_LIB.map" "$MICROPYTHON_LIB_MAP.map"
 fi
 
 cd $LAUNCHER_HOME
@@ -67,7 +66,6 @@ then
     echo "execute PythonState's main"
     shift
     $MPOC_LAUNCH $MPOC_ROM/bios.py $@
-    if [[ $? == 1 ]]; then $JAVA_HOME/bin/javap -s org.micropython.jnupy.PythonNativeState; fi
 elif [[ "$1" == "slow" ]]
 then
     echo "execute jython"
