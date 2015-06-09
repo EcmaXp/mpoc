@@ -1,9 +1,9 @@
 [submodule "micropython"]
-	path = micropython
+	path = "assets/micropython"
 	url = git@github.com:EcmaXp/micropython.git
 [submodule "opencomputers"]
-	path = opencomputers
+	path = ".ref/opencomputers"
 	url = git@github.com:EcmaXp/opencomputers.git
 [submodule "msgpack-c"]
-	path = "msgpack-c"
+	path = ".ref/msgpack-c"
 	url = git@github.com:msgpack/msgpack-c.git
