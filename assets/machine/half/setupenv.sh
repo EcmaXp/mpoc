@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PROJECT_HOME="$HOME/workspace"
+export PROJECT_HOME="$HOME/workspace/assets"
 
 export LAUNCHER_HOME="$PROJECT_HOME/machine/half" # "$( dirname ${BASH_SOURCE[0]})"
 export LAUNCHER_ENV="$LAUNCHER_HOME/env"
