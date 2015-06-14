@@ -8,7 +8,6 @@ export LAUNCHER_ENV="$LAUNCHER_HOME/env"
 
 export VIRTUAL_HOME="$LAUNCHER_HOME/virtual"
 export VIRTUAL_SRC="$VIRTUAL_HOME/src"
-export VIRTUAL_SRC_BUILD="$VIRTUAL_HOME/src_build"
 export VIRTUAL_BUILD="$VIRTUAL_HOME/build"
 export VIRTUAL_MANIFEST="$VIRTUAL_HOME/manifest"
 export VIRTUAL_JAR="$VIRTUAL_HOME/virtual.jar"

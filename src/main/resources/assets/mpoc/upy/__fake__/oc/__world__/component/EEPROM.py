@@ -1,21 +1,12 @@
 from ._environ import *
 
-class EEPROM:
+class EEPROM(Component):
     def __init__(self, address, code="", label="", readonly=False, data=""):
         super().__init__(address)
         self.code = code
         self.label = label
         self.readonly = False
         self.data = data
-    
-    # TODO: common persist function for registered object?
-    #       [!] will be move to persist module.
-    def __persist__(self):
-        return EEPROM, self.address
-    
-    @classmethod
-    def __unpersist__(cls, *args):
-        return cls(*args)
     
     @Callback(direct = true)
     def get(self) -> str:

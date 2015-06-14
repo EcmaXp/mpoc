@@ -8,7 +8,13 @@ except ImportError:
 try:
     __path__ = __file__.rpartition("/")[0]
     sys.path.append(__path__)
+    sys.path.append(__path__ + "/oclib")
+    sys.path.append(__path__ + "/pylib")
     
+    battery = jnupy.getenv("MICROPYTHON_BATTERY")
+    assert battery
+    sys.path.append(battery)
+        
     try:
         import oc
         oc.fake = False

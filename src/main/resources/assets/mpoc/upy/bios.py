@@ -8,11 +8,30 @@ class Kernel():
         pass
 
     def __call__(self, command, *args):
+        return getattr(self, command)(*args)
+    
+    def initialize(self):
+        pass
+
+    def threaded(self, is_synchronized):
+        pass
+    
+    def synchronized(self):
+        pass
+
+    def close(self):
         pass
 
 kernel = Kernel()
 
 def main():
-    print("main executed")
-
-print("bios executed")
+    import sys
+    try:
+        kernel.initialize()
+        kernel.threaded(False)
+        kernel.close()
+    except BaseException as e:
+        sys.print_exception(e)
+    
+    import code
+    code.interact(local=globals())

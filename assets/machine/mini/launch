@@ -5,14 +5,14 @@ echo "mini-launcher"
 export MINI_LAUNCHER_HOME=$(dirname $(realpath ${BASH_SOURCE[0]}))
 export OPENCOM_ROOT=$(realpath "$MINI_LAUNCHER_HOME/../../micropython/opencom")
 
+# This is just wapper for execute java
+source $MINI_LAUNCHER_HOME/../../machine/half/setupenv.sh
+
 cd $OPENCOM_ROOT
 make
 if [[ $? != 0 ]]; then exit 1; fi
 
 cd $MINI_LAUNCHER_HOME
-
-# This is just wapper for execute java
-source $OPENCOM_ROOT/../../machine/half/setupenv.sh
 
 export MICROPYTHON_LAUNCHER="$MPOC_ROM/machine.py"
 export MICROPYTHON_LIB="$OPENCOM_ROOT/libmicropython.so"
