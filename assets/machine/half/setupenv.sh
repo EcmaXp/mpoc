@@ -1,8 +1,8 @@
 #!/bin/bash
 
-export PROJECT_HOME="$HOME/workspace/assets"
+export PROJECT_HOME="$HOME/workspace"
 
-export LAUNCHER_HOME="$PROJECT_HOME/machine/half" # "$( dirname ${BASH_SOURCE[0]})"
+export LAUNCHER_HOME="$PROJECT_HOME/assets/machine/half" # "$( dirname ${BASH_SOURCE[0]})"
 export LAUNCHER_ENV="$LAUNCHER_HOME/env"
 
 export VIRTUAL_HOME="$LAUNCHER_HOME/virtual"
@@ -30,7 +30,7 @@ export OPENCOM_NATIVE_LIB="$OPENCOM_HOME/lib/native.64.so"
 export MSGPACK_HOME="$LAUNCHER_ENV/msgpack-java"
 export MSGPACK_JAR="$MSGPACK_HOME/msgpack-0.6.12.jar"
 
-export MICROPYTHON_HOME="$PROJECT_HOME/micropython"
+export MICROPYTHON_HOME="$PROJECT_HOME/assets/micropython"
 export MICROPYTHON_PORT="opencom"
 export MICROPYTHON_PORT_HOME="$MICROPYTHON_HOME/$MICROPYTHON_PORT"
 export MICROPYTHON_PORT_EXE_NAME="micropython"
@@ -41,7 +41,7 @@ export MICROPYTHON_BATTERY="$MICROPYTHON_PORT_HOME/lib"
 export MICROPYTHON_LIB="$LAUNCHER_HOME/$MICROPYTHON_PORT_LIB_NAME"
 export MICROPYTHON_JAR="$MICROPYTHON_PORT_HOME/micropython.jar"
 
-export MPOC_ROM="$PROJECT_HOME/machine/rom"
+export MPOC_ROM="$PROJECT_HOME/src/main/resources/assets/mpoc/upy"
 
 export JAVACMD=$JAVA_HOME/bin/java
 export JAVA_MEM="-Xmx128m -Xms32m"
