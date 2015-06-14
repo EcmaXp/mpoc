@@ -1,8 +1,9 @@
 #!/bin/bash
 
-export PROJECT_HOME="$HOME/workspace"
+# ~/workspace/assets/machine/half/setupenv.sh
+export PROJECT_HOME=$(realpath $(dirname ${BASH_SOURCE[0]})/../../../)
 
-export LAUNCHER_HOME="$PROJECT_HOME/assets/machine/half" # "$( dirname ${BASH_SOURCE[0]})"
+export LAUNCHER_HOME="$PROJECT_HOME/assets/machine/half"
 export LAUNCHER_ENV="$LAUNCHER_HOME/env"
 
 export VIRTUAL_HOME="$LAUNCHER_HOME/virtual"

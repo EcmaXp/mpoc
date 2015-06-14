@@ -18,9 +18,6 @@ public class OpenComPythonState extends PythonState {
 		}
 		
 		try {
-		    PythonModule mococ = py.newModule("oc");
-		    // just place fake module.
-		    
 			PythonModule modsys = py.importModule("sys");
 
 			PythonObject argv = py.getBuiltin("list").rawCall();

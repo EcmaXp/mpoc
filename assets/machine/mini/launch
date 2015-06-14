@@ -2,8 +2,8 @@
 
 echo "mini-launcher"
 
-export MINI_LAUNCHER_HOME=$( cd "$( dirname "$( dirname ${BASH_SOURCE[0]})" )" && pwd )
-OPENCOM_ROOT=$( cd "$( dirname "$MINI_LAUNCHER_HOME/../../micropython/opencom/." )" && pwd )
+export MINI_LAUNCHER_HOME=$(dirname $(realpath ${BASH_SOURCE[0]}))
+export OPENCOM_ROOT=$(realpath "$MINI_LAUNCHER_HOME/../../micropython/opencom")
 
 cd $OPENCOM_ROOT
 make
@@ -18,6 +18,6 @@ export MICROPYTHON_LAUNCHER="$MPOC_ROM/machine.py"
 export MICROPYTHON_LIB="$OPENCOM_ROOT/libmicropython.so"
 export CLASSPATH="$OPENCOM_ROOT/micropython.jar:$MINI_LAUNCHER_HOME"
 
-$JAVA_HOME/bin/javac -cp $OPENCOM_ROOT/micropython.jar $MINI_LAUNCHER_HOME/MPOC/*.java
+make MPOC/OpenComPythonState.class
 
 exec $JAVACMD MPOC.OpenComPythonState $MICROPYTHON_LAUNCHER $@
