@@ -22,7 +22,7 @@ group= "kr.pe.ecmaxp.mpoc" // http://maven.apache.org/guides/mini/guide-naming-c
 archivesBaseName = "mpoc"
 
 minecraft {
-    version = "1.7.10-10.13.4.1448"
+    version = "1.7.10-10.13.4.1448-1.7.10"
     runDir = "eclipse"
     
     // the mappings can be changed at any time, and must be in the following format.
