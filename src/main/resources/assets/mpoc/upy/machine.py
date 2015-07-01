@@ -14,7 +14,7 @@ try:
     battery = jnupy.getenv("MICROPYTHON_BATTERY")
     assert battery
     sys.path.append(battery)
-        
+    
     try:
         import oc
         oc.fake = False

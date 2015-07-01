@@ -1,6 +1,8 @@
 import jnupy
 import oc
 
+__all__ = ["kernel"]
+
 # Sleep, Shutdown, SynchronizedCall, Error
 
 class Kernel():
@@ -24,14 +26,15 @@ class Kernel():
 
 kernel = Kernel()
 
-def main():
-    import sys
-    try:
-        kernel.initialize()
-        kernel.threaded(False)
-        kernel.close()
-    except BaseException as e:
-        sys.print_exception(e)
-    
-    import code
-    code.interact(local=globals())
+if oc.fake:
+    def main():
+        import sys
+        try:
+            kernel.initialize()
+            kernel.threaded(False)
+            kernel.close()
+        except BaseException as e:
+            sys.print_exception(e)
+        
+        import code
+        code.interact(local=globals())
