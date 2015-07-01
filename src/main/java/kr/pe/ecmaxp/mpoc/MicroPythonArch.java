@@ -8,18 +8,22 @@ import li.cil.oc.api.machine.ExecutionResult;
 import li.cil.oc.api.machine.Machine;
 import li.cil.oc.api.machine.Signal;
 
-import li.cil.oc.Settings;
+// import li.cil.oc.Settings;
 
 import org.micropython.jnupy.PythonState;
 import org.micropython.jnupy.PythonObject;
 import org.micropython.jnupy.PythonModule;
+
+import java.util.ArrayList;
+
 import org.micropython.jnupy.PythonException;
 import org.micropython.jnupy.PythonImportStat;
 
 @Architecture.Name("MicroPython")
-public class MicroPythonArch {
+public class MicroPythonArch implements Architecture {
     private ArrayList<MicroPythonAPI> apis;
-    private inited;
+    @SuppressWarnings("unused")
+	private boolean inited;
     
     private PythonModule ocmod;
     private PythonObject kernel;
@@ -32,15 +36,13 @@ public class MicroPythonArch {
         this.machine = machine;
         this.inited = false;
         
-        this.apis.add(new MicroPythonAPI(this));
+        this.apis.add(new OSAPI(this));
     }
 
-    @Override
     public boolean isInitialized() {
         return (this.kernel != null);
     }
 
-    @Override
     public boolean recomputeMemory(Iterable<ItemStack> components) {
         // TODO: if memory changed then crash? (or return false??)
         // NOTE: MicroPython can't limit memory with dynamic size
@@ -54,20 +56,26 @@ public class MicroPythonArch {
         return 512 * 1024;
     }
 
-    @Override
     public boolean initialize() {
         close();
         
-        int memorySize = computeMemory()
-        PythonState pystate = new PythonState(memorySize) {
-        	public PythonImportStat readStat(String path) {
-        		return PythonImportStat.MP_IMPORT_STAT_NO_EXIST; 
-        	}
-        	
-        	public String readFile(String filename) {
-        		return "";
-        	}
-        };
+        int memorySize = computeMemory();
+        PythonState pystate;
+		try {
+			pystate = new PythonState(memorySize) {
+				public PythonImportStat readStat(String path) {
+					return PythonImportStat.MP_IMPORT_STAT_NO_EXIST; 
+				}
+				
+				public String readFile(String filename) {
+					return "";
+				}
+			};
+		} catch (PythonException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			return false;
+		}
         
         try {
             this.ocmod = pystate.newModule("oc");
@@ -79,7 +87,7 @@ public class MicroPythonArch {
             
             // Machine.getResourceAsStream(Settings.scriptPath + "machine.py")
             
-            this.pystate.builtins.get("__import__");
+            // this.pystate.builtins.get("__import__");
             
             String code = this.pystate.readFile("machine.py");
             this.pystate.execute(code);
@@ -96,18 +104,17 @@ public class MicroPythonArch {
         return true;
     }
 
-    PythonModule newOCModule(String name) {
+    PythonModule newOCModule(String name) throws PythonException {
         PythonModule module = pystate.newModule("oc." + name);
         this.ocmod.setattr(name, module);
         
         return module;
     }
 
-    Object invoke(Object ...args) {
+    Object invoke(Object ...args) throws PythonException {
         return this.kernel.invoke(args);
     }
 
-    @Override
     public void close() {
         if (this.kernel != null) {
             // TODO: require this?
@@ -121,42 +128,38 @@ public class MicroPythonArch {
         }
         
         if (this.pystate != null) {
-            try {
-                this.pystate.close();
-            } catch (PythonException e) {
-                e.printStackTrace();
-            }
-            
+            this.pystate.close();
             this.pystate = null;
         }
     }
 
-    @Override
     public void runSynchronized() {
-        invoke("synchronized");
+        try {
+			invoke("synchronized");
+		} catch (PythonException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
     
-    @Override
     public ExecutionResult runThreaded(boolean isSynchronizedReturn) {
         try {
             Object result = invoke("threaded", new Boolean(isSynchronizedReturn));
             if (result instanceof ExecutionResult) {
-                return result;
+                return (ExecutionResult) result;
             } else if (result == null) {
                 return new ExecutionResult.Error("kernel return null");
             } else {
-                return new ExecutionResult.Error("kernel return unknown object: " + result.toString()));
+                return new ExecutionResult.Error("kernel return unknown object: " + result.toString());
             }
         } catch (PythonException e) {
             return new ExecutionResult.Error(e.toString());
         }
     }
 
-    @Override
     public void onConnect() {
     }
 
-    @Override
     public void load(NBTTagCompound nbt) {
         // ?
         for (MicroPythonAPI api: this.apis) {
@@ -164,7 +167,6 @@ public class MicroPythonArch {
         }
     }
 
-    @Override
     public void save(NBTTagCompound nbt) {
         // ?
         for (MicroPythonAPI api: this.apis) {

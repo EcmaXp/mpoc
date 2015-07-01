@@ -1,11 +1,13 @@
 package kr.pe.ecmaxp.mpoc;
 
+import org.micropython.jnupy.PythonException;
+
 // TODO: check li.cil.oc.server.machine.ArchitectureAPI
 
 import li.cil.oc.api.machine.Machine;
 import net.minecraft.nbt.NBTTagCompound;
 
-public class MicroPythonAPI {
+public abstract class MicroPythonAPI {
     MicroPythonArch owner;
     Machine machine;
 
@@ -18,7 +20,7 @@ public class MicroPythonAPI {
     // protected def node = machine.node
     // protected def components = machine.components
 
-    abstract public void initialize();
+    abstract public void initialize() throws PythonException;
 
 	public void load(NBTTagCompound nbt) {
         // stub; only override when require loading from nbt;
