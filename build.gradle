@@ -59,6 +59,18 @@ dependencies {
 
 }
 
+sourceSets {
+    jnupy {
+        java {
+            srcDir 'assets/micropython/java'
+        }
+        // TODO: how to apply java source/resource? (./opencom/src/main/java?)
+        // resources {
+        //    srcDir 'assets/micropython/java'
+        // }
+	}
+}
+
 processResources
 {
     // this will ensure that this task is redone when the versions change.
