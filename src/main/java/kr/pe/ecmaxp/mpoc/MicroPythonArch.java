@@ -2,7 +2,7 @@ package kr.pe.ecmaxp.mpoc;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-
+import net.minecraftforge.event.CommandEvent;
 import li.cil.oc.api.machine.Architecture;
 import li.cil.oc.api.machine.ExecutionResult;
 import li.cil.oc.api.machine.Machine;
@@ -11,13 +11,26 @@ import li.cil.oc.api.machine.Signal;
 // import li.cil.oc.Settings;
 
 import org.micropython.jnupy.PythonState;
+
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+
 import org.micropython.jnupy.PythonObject;
 import org.micropython.jnupy.PythonModule;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
+import org.micropython.jnupy.PythonArguments;
 import org.micropython.jnupy.PythonException;
 import org.micropython.jnupy.PythonImportStat;
+import org.micropython.jnupy.JavaFunction.*;
 
 @Architecture.Name("MicroPython")
 public class MicroPythonArch implements Architecture {
@@ -40,7 +53,7 @@ public class MicroPythonArch implements Architecture {
     }
 
     public boolean isInitialized() {
-        return (this.kernel != null);
+        return (inited && this.kernel != null);
     }
 
     public boolean recomputeMemory(Iterable<ItemStack> components) {
@@ -55,7 +68,7 @@ public class MicroPythonArch implements Architecture {
         // 512 KB
         return 512 * 1024;
     }
-
+    
     public boolean initialize() {
         close();
         
@@ -63,21 +76,47 @@ public class MicroPythonArch implements Architecture {
         PythonState pystate;
 		try {
 			pystate = new PythonState(memorySize) {
+				private File resolvePath(String path) {
+					return Paths.get("C:\\Users\\EcmaXp\\Documents\\GitHub\\mpoc\\src\\main\\resources\\assets\\mpoc\\upy\\").resolve(path).toFile();
+				}
+				
 				public PythonImportStat readStat(String path) {
-					return PythonImportStat.MP_IMPORT_STAT_NO_EXIST; 
+					// we need check '..' but this is dev version.
+					File file = resolvePath(path);
+					
+					try {
+						if (!file.exists()) {
+							// ...
+						} else if (file.isFile() && file.canRead()) {
+							return PythonImportStat.MP_IMPORT_STAT_FILE;
+						} else if (file.isDirectory()) {
+							return PythonImportStat.MP_IMPORT_STAT_DIR;
+						}
+			 		} catch (SecurityException e) {
+						// ...
+					}
+					
+					return PythonImportStat.MP_IMPORT_STAT_NO_EXIST;
 				}
 				
 				public String readFile(String filename) {
-					return "";
+					File file = resolvePath(filename);
+					byte[] encoded;
+					
+					try {
+						encoded = Files.readAllBytes(file.toPath());
+					} catch (IOException e) {
+						// TODO: exception...
+						throw new RuntimeException("?", e);			
+					} catch (SecurityException e) {
+						// TODO: exception...
+						throw new RuntimeException("?", e);
+					}
+					
+					return new String(encoded, StandardCharsets.UTF_8);
 				}
 			};
-		} catch (PythonException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-			return false;
-		}
-        
-        try {
+
             this.ocmod = pystate.newModule("oc");
             this.pystate = pystate;
             
@@ -86,18 +125,34 @@ public class MicroPythonArch implements Architecture {
             }
             
             // Machine.getResourceAsStream(Settings.scriptPath + "machine.py")
-            
             // this.pystate.builtins.get("__import__");
             
             String code = this.pystate.readFile("machine.py");
-            this.pystate.execute(code);
+            pystate.execute(code);
+            
+            PythonModule modmpoc = pystate.newModule("mpoc");
+            modmpoc.set(new NamedJavaFun1("ginput") {
+    			public Object invoke(PythonState pythonState, PythonArguments args) throws PythonException {
+    				Object arg = args.get(0);
+    				
+    				JFrame frame = new JFrame("<jnupy-input>");
+    				try {
+    					String s = (String)JOptionPane.showInputDialog(frame, "prompt", "minecraft mpoc inputbox", JOptionPane.PLAIN_MESSAGE);
+        				return s;
+    				} finally {
+    					frame.dispose();
+    				}
+    			}
+            });
             
             PythonModule modmain = this.pystate.getMainModule();
             this.kernel = modmain.getattr("kernel");
             
             invoke("initialize");
+            this.inited = true;
         } catch (PythonException e) {
-            // ?
+        	// ?
+        	e.printStackTrace();
             return false;
         }
         
