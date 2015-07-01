@@ -33,12 +33,21 @@ minecraft {
     // mappings = "stable_#"
 }
 
+repositories {
+    // OpenComputers
+    maven {
+        url = "http://maven.cil.li/"
+    }
+}
+
 dependencies {
     // you may put jars on which you depend on in ./libs
     // or you may define them like so..
     //compile "some.group:artifact:version:classifier"
     //compile "some.group:artifact:version"
-    compile "li.cil.oc:OpenComputers:MC1.7.10-1.4.+:api"
+
+    // OpenComputers
+    compile "li.cil.oc:OpenComputers:MC1.7.10-1.5.+:api"
     
     // real examples
     //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
