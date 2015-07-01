@@ -1,5 +1,6 @@
 language: java
 install:
+    - ./gradlew
     - echo success install
 script:
     - ./gradlew jar
