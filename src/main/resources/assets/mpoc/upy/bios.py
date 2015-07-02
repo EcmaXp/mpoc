@@ -25,9 +25,9 @@ class Component():
     def __getattr__(self, name):
         def wrapper(*args):
             # TODO: detect direct and non-direct function
-            pause(oc.execution.SynchonizedCall())
+            #pause(oc.execution.SynchonizedCall())
             result = oc.component.invoke(self.address, name, args)
-            pause(oc.execution.Sleep(0))
+            #pause(oc.execution.Sleep(0))
             return result
         return wrapper
 
@@ -49,10 +49,22 @@ def system():
 
     gpu.set(1, 1, "hello world in MicroPython")
 
+    x = 1
     while True:
         signal = oc.computer.pullSignal()
         if not signal:
-            pause(oc.execution.Sleep(20))
+            pause(oc.execution.Sleep(0))
+            continue
+
+        print(signal)
+        name, args = signal
+        if name == "key_down":
+            address, ch, limit, user = args
+            ch = int(ch)
+            char = chr(ch)
+            gpu.set(x, 2, char)
+            x += 1
+
 
 class Kernel():
     def __init__(self):
