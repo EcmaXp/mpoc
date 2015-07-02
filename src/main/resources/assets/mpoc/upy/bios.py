@@ -47,17 +47,12 @@ def system():
     gpu.setForeground(0xFFFFFF)
     gpu.fill(1, 1, 80, 25, " ")
 
-    for i in range(100000):
-        if (i % 10000) == 0:
-            print(i, "should splited by exec")
-
     gpu.set(1, 1, "hello world in MicroPython")
 
     while True:
-        print("world")
-        print(oc.computer.pullSignal())
-        print("world2")
-        pause(oc.execution.Sleep(20))
+        signal = oc.computer.pullSignal()
+        if not signal:
+            pause(oc.execution.Sleep(20))
 
 class Kernel():
     def __init__(self):

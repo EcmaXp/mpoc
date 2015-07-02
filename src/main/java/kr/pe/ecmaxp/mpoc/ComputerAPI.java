@@ -36,7 +36,7 @@ public class ComputerAPI extends MicroPythonAPI {
             	PythonObject result = pythonState.getBuiltin("list").rawCall();
             	PythonObject append = result.attr("append");
             	append.rawCall(signal.name());
-            	append.rawCall(signal.args());
+            	append.invoke((Object) signal.args());
             	
         		return pythonState.getBuiltin("tuple").rawCall(result);
 			}
