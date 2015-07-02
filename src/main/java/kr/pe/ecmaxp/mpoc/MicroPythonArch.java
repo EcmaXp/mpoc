@@ -31,6 +31,8 @@ import org.micropython.jnupy.PythonArguments;
 import org.micropython.jnupy.PythonException;
 import org.micropython.jnupy.PythonImportStat;
 import org.micropython.jnupy.JavaFunction.*;
+import org.micropython.jnupy.NativeSupport;
+import org.micropython.jnupy.NativeSupport.Loader;
 
 @Architecture.Name("MicroPython")
 public class MicroPythonArch implements Architecture {
@@ -40,9 +42,19 @@ public class MicroPythonArch implements Architecture {
     
     private PythonModule ocmod;
     private PythonObject kernel;
+    private ExecutionResult lastSyncResult;
     
     Machine machine;
     PythonState pystate;
+    
+    static {
+		NativeSupport.getInstance().setLoader(new Loader() {
+			@Override
+			public void load() {
+				System.load("C:\\Users\\EcmaXp\\Documents\\GitHub\\mpoc\\assets\\micropython\\windows\\libmicropython.dll");
+			}
+		});
+    }
     
     public MicroPythonArch(Machine machine) {
         this.apis = new ArrayList<MicroPythonAPI>();
@@ -50,6 +62,9 @@ public class MicroPythonArch implements Architecture {
         this.inited = false;
         
         this.apis.add(new OSAPI(this));
+        this.apis.add(new ExecutionAPI(this));
+        this.apis.add(new ComponentAPI(this));
+        this.apis.add(new ComputerAPI(this));
     }
 
     public boolean isInitialized() {
@@ -75,7 +90,7 @@ public class MicroPythonArch implements Architecture {
         int memorySize = computeMemory();
         PythonState pystate;
 		try {
-			pystate = new PythonState(memorySize) {
+			pystate = new PythonState(memorySize, 128 * 1024) {
 				private File resolvePath(String path) {
 					return Paths.get("C:\\Users\\EcmaXp\\Documents\\GitHub\\mpoc\\src\\main\\resources\\assets\\mpoc\\upy\\").resolve(path).toFile();
 				}
@@ -148,7 +163,7 @@ public class MicroPythonArch implements Architecture {
             PythonModule modmain = this.pystate.getMainModule();
             this.kernel = modmain.getattr("kernel");
             
-            invoke("initialize");
+            rawInvoke("initialize");
             this.inited = true;
         } catch (PythonException e) {
         	// ?
@@ -166,15 +181,33 @@ public class MicroPythonArch implements Architecture {
         return module;
     }
 
-    Object invoke(Object ...args) throws PythonException {
-        return this.kernel.invoke(args);
+    ExecutionResult invoke(Object ...args) {
+    	assert(args.length >= 1) && (args[0] instanceof String);
+    	String command = (String)args[0];
+    	
+    	try {
+            Object result = rawInvoke(args);
+            if (result instanceof ExecutionResult) {
+                return (ExecutionResult) result;
+            } else if (result == null) {
+                return new ExecutionResult.Error("kernel(" + command + ") return null");
+            } else {
+                return new ExecutionResult.Error("kernel(" + command + ") return unknown object : " + result.toString());
+            }
+        } catch (PythonException e) {
+            return new ExecutionResult.Error("kerenl has error: " + e.toString());
+        }
     }
 
+    Object rawInvoke(Object ...args) throws PythonException {
+    	return this.kernel.invoke(args);
+    }
+    
     public void close() {
         if (this.kernel != null) {
             // TODO: require this?
             try {
-                invoke("force_close");
+                rawInvoke("force_close");
             } catch (PythonException e) {
                 // ?
                 e.printStackTrace();
@@ -189,27 +222,20 @@ public class MicroPythonArch implements Architecture {
     }
 
     public void runSynchronized() {
-        try {
-			invoke("synchronized");
-		} catch (PythonException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    	assert(this.lastSyncResult == null);
+    	this.lastSyncResult = invoke("synchronized");
     }
     
     public ExecutionResult runThreaded(boolean isSynchronizedReturn) {
-        try {
-            Object result = invoke("threaded", new Boolean(isSynchronizedReturn));
-            if (result instanceof ExecutionResult) {
-                return (ExecutionResult) result;
-            } else if (result == null) {
-                return new ExecutionResult.Error("kernel return null");
-            } else {
-                return new ExecutionResult.Error("kernel return unknown object: " + result.toString());
-            }
-        } catch (PythonException e) {
-            return new ExecutionResult.Error(e.toString());
-        }
+    	if (isSynchronizedReturn) {
+    		assert(this.lastSyncResult != null);
+    		ExecutionResult result = this.lastSyncResult;
+    		this.lastSyncResult = null;
+
+    		return result;
+    	}
+    	
+        return invoke("threaded");
     }
 
     public void onConnect() {
