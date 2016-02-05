@@ -1,6 +1,9 @@
 import jnupy
 import oc
 import sys
+import gc
+import micropython
+sys.path.append(r"D:\Users\EcmaXp\Documents\GitHub\micropython\opencom\lib")
 import microthread
 from microthread import pause
 
@@ -10,6 +13,7 @@ class Component():
     def __init__(self, name=None, address=None):
         components = oc.component.getList()
         for key, value in components.items():
+            print(key, value)
             if value == name:
                 address = key
                 break
@@ -48,12 +52,16 @@ def system():
     gpu.fill(1, 1, 80, 25, " ")
 
     gpu.set(1, 1, "hello world in MicroPython")
+    gc.enable()
 
     x = 1
     while True:
+        micropython.mem_info()
         signal = oc.computer.pullSignal()
         if not signal:
-            pause(oc.execution.Sleep(0))
+            # obj = oc.execution.Sleep(0)
+            obj = None
+            pause(obj)
             continue
 
         print(signal)
@@ -99,7 +107,6 @@ class Kernel():
             elif result == microthread.LIMIT_HARD:
                 return oc.execution.Error("system running too long long")
 
-        print(status, result)
         return oc.execution.Error("unknown state")
 
     def threaded(self, *_):
@@ -118,15 +125,21 @@ rawkernel = Kernel()
 
 def kernel(*args):
     try:
-        result = rawkernel(*args)
-        found = repr(result).partition("$")[2].partition("@")[0]
-        # print("kernel", args, '->', found or result)
-        return result
+        try:
+            print(args)
+            result = rawkernel(*args)
+            found = repr(result).partition("$")[2].partition("@")[0]
+            print("kernel", args, '->', found or result)
+            return result
+        except BaseException as e:
+            # print("kernel", args)
+            print("kernel-exception", e)
+            sys.print_exception(e)
+            print("???")
+            return None # oc.execution.Error("exception: " + repr(e))
     except BaseException as e:
-        # print("kernel", args)
-        print("kernel-exception", e)
         sys.print_exception(e)
-        return oc.execution.Error("exception: " + repr(e))
+        return None
 
 if oc.fake:
     def main():

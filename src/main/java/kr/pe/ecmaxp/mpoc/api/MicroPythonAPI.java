@@ -1,6 +1,7 @@
-package kr.pe.ecmaxp.mpoc;
+package kr.pe.ecmaxp.mpoc.api;
 
 import org.micropython.jnupy.PythonException;
+import kr.pe.ecmaxp.mpoc.MicroPythonArch;
 
 // TODO: check li.cil.oc.server.machine.ArchitectureAPI
 
@@ -13,7 +14,7 @@ public abstract class MicroPythonAPI {
 
     MicroPythonAPI(MicroPythonArch owner) {
         this.owner = owner;
-        this.machine = owner.machine;
+        this.machine = owner.getMachine();
     }
     
     // scala version.

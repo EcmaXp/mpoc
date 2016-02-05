@@ -2,17 +2,14 @@ package kr.pe.ecmaxp.mpoc;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.event.CommandEvent;
 import li.cil.oc.api.machine.Architecture;
 import li.cil.oc.api.machine.ExecutionResult;
 import li.cil.oc.api.machine.Machine;
-import li.cil.oc.api.machine.Signal;
+
 
 // import li.cil.oc.Settings;
 
 import org.micropython.jnupy.PythonState;
-
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 import org.micropython.jnupy.PythonObject;
 import org.micropython.jnupy.PythonModule;
@@ -31,32 +28,36 @@ import org.micropython.jnupy.PythonArguments;
 import org.micropython.jnupy.PythonException;
 import org.micropython.jnupy.PythonImportStat;
 import org.micropython.jnupy.JavaFunction.*;
-import org.micropython.jnupy.NativeSupport;
-import org.micropython.jnupy.NativeSupport.Loader;
+import org.micropython.jnupy.JavaObject;
+
+import kr.pe.ecmaxp.mpoc.api.ComponentAPI;
+import kr.pe.ecmaxp.mpoc.api.ComputerAPI;
+import kr.pe.ecmaxp.mpoc.api.ExecutionAPI;
+import kr.pe.ecmaxp.mpoc.api.MicroPythonAPI;
+import kr.pe.ecmaxp.mpoc.api.OSAPI;
 
 @Architecture.Name("MicroPython")
 public class MicroPythonArch implements Architecture {
     private ArrayList<MicroPythonAPI> apis;
-    @SuppressWarnings("unused")
-	private boolean inited;
+    private boolean inited;
     
     private PythonModule ocmod;
     private PythonObject kernel;
     private ExecutionResult lastSyncResult;
     
-    Machine machine;
-    PythonState pystate;
+    public final Machine machine;
+    private PythonState pystate;
     
     static {
-		NativeSupport.getInstance().setLoader(new Loader() {
+		/* NativeSupport.getInstance().setLoader(new Loader() {
 			@Override
 			public void load() {
 				System.load("C:\\Users\\EcmaXp\\Documents\\GitHub\\mpoc\\assets\\micropython\\windows\\libmicropython.dll");
 			}
-		});
+		}); */
     }
-    
-    public MicroPythonArch(Machine machine) {
+
+	public MicroPythonArch(Machine machine) {
         this.apis = new ArrayList<MicroPythonAPI>();
         this.machine = machine;
         this.inited = false;
@@ -84,6 +85,10 @@ public class MicroPythonArch implements Architecture {
         return 512 * 1024;
     }
     
+    public PythonState getState() {
+    	return pystate;
+    }
+    
     public boolean initialize() {
         close();
         
@@ -92,7 +97,7 @@ public class MicroPythonArch implements Architecture {
 		try {
 			pystate = new PythonState(memorySize, 128 * 1024) {
 				private File resolvePath(String path) {
-					return Paths.get("C:\\Users\\EcmaXp\\Documents\\GitHub\\mpoc\\src\\main\\resources\\assets\\mpoc\\upy\\").resolve(path).toFile();
+					return Paths.get("D:\\Users\\EcmaXp\\Documents\\MCMods\\mpoc\\src\\main\\resources\\assets\\mpoc\\upy\\").resolve(path).toFile();
 				}
 				
 				public PythonImportStat readStat(String path) {
@@ -146,10 +151,9 @@ public class MicroPythonArch implements Architecture {
             pystate.execute(code);
             
             PythonModule modmpoc = pystate.newModule("mpoc");
+            System.out.println("?");
             modmpoc.set(new NamedJavaFun1("ginput") {
     			public Object invoke(PythonState pythonState, PythonArguments args) throws PythonException {
-    				Object arg = args.get(0);
-    				
     				JFrame frame = new JFrame("<jnupy-input>");
     				try {
     					String s = (String)JOptionPane.showInputDialog(frame, "prompt", "minecraft mpoc inputbox", JOptionPane.PLAIN_MESSAGE);
@@ -174,7 +178,7 @@ public class MicroPythonArch implements Architecture {
         return true;
     }
 
-    PythonModule newOCModule(String name) throws PythonException {
+    public PythonModule newOCModule(String name) throws PythonException {
         PythonModule module = pystate.newModule("oc." + name);
         this.ocmod.setattr(name, module);
         
@@ -200,12 +204,23 @@ public class MicroPythonArch implements Architecture {
     }
 
     Object rawInvoke(Object ...args) throws PythonException {
-    	return this.kernel.invoke(args);
+    	System.out.println("ENTER");
+    	for (Object arg : args) {
+        	System.out.println(arg);    		
+    	}
+    	Object result = this.kernel.invoke(args);
+    	if (result instanceof JavaObject) {
+    		System.out.println("UNWARP");
+    		result = ((JavaObject) result).getObject();
+    	}
+    	System.out.println(result);
+    	System.out.println("LEAVE");
+    	
+    	return new ExecutionResult.Sleep(0);
     }
     
     public void close() {
         if (this.kernel != null) {
-            // TODO: require this?
             try {
                 rawInvoke("force_close");
             } catch (PythonException e) {
@@ -254,4 +269,8 @@ public class MicroPythonArch implements Architecture {
             api.save(nbt);
         }
     }
+
+	public Machine getMachine() {
+		return machine;
+	}
 }

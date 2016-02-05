@@ -1,15 +1,12 @@
-package kr.pe.ecmaxp.mpoc;
-
-import li.cil.oc.api.machine.Machine;
-// import li.cil.oc.util.GameTimeFormatter;
+package kr.pe.ecmaxp.mpoc.api;
 
 import org.micropython.jnupy.PythonState;
 import org.micropython.jnupy.PythonModule;
-import org.micropython.jnupy.PythonObject;
 import org.micropython.jnupy.PythonArguments;
 import org.micropython.jnupy.PythonException;
 import org.micropython.jnupy.JavaFunction.*;
 
+import kr.pe.ecmaxp.mpoc.MicroPythonArch;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class OSAPI extends MicroPythonAPI {
@@ -18,7 +15,6 @@ public class OSAPI extends MicroPythonAPI {
     }
     
     public void initialize() throws PythonException {
-        PythonState pystate = owner.pystate;
         PythonModule modos = owner.newOCModule("os");
         
         modos.set(new NamedJavaFun0("clock") {

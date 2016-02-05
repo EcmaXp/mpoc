@@ -1,9 +1,4 @@
-package kr.pe.ecmaxp.mpoc;
-
-import li.cil.oc.api.machine.ExecutionResult;
-import li.cil.oc.api.machine.Machine;
-// import li.cil.oc.util.GameTimeFormatter;
-import li.cil.oc.api.network.Component;
+package kr.pe.ecmaxp.mpoc.api;
 
 import org.micropython.jnupy.PythonState;
 import org.micropython.jnupy.PythonModule;
@@ -15,6 +10,7 @@ import java.util.Map;
 
 import org.micropython.jnupy.JavaFunction.*;
 
+import kr.pe.ecmaxp.mpoc.MicroPythonArch;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class ComponentAPI extends MicroPythonAPI {
@@ -23,19 +19,18 @@ public class ComponentAPI extends MicroPythonAPI {
     }
     
     public void initialize() throws PythonException {
-        PythonState pystate = owner.pystate;
         PythonModule module = owner.newOCModule("component");
         
         module.set(new NamedJavaFun0("getList") {
             @Override
 			public Object invoke(PythonState pythonState, PythonArguments args) throws PythonException {
-            	Map<String, String> components = owner.machine.components();
+            	Map<String, String> components = owner.getMachine().components();
             	PythonObject result = pythonState.getBuiltin("dict").rawCall();
             	PythonObject set = result.attr("__setitem__");
 
             	synchronized (components) {
                 	for (Map.Entry<String, String> entry : components.entrySet()) {
-                		set.rawInvoke(entry.getKey(), entry.getValue());
+                		set.invoke(entry.getKey(), entry.getValue());
                 	}			
 				}
             	
@@ -46,7 +41,7 @@ public class ComponentAPI extends MicroPythonAPI {
         module.set(new NamedJavaFun1("getType") {
             @Override
 			public Object invoke(PythonState pythonState, PythonArguments args) throws PythonException {
-            	Map<String, String> components = owner.machine.components();
+            	Map<String, String> components = owner.getMachine().components();
             	String address = (String)args.get(0);
             	
             	synchronized (components) {
@@ -58,12 +53,12 @@ public class ComponentAPI extends MicroPythonAPI {
         module.set(new NamedJavaFun1("getSlot") {
             @Override
 			public Object invoke(PythonState pythonState, PythonArguments args) throws PythonException {
-            	Map<String, String> components = owner.machine.components();
+            	Map<String, String> components = owner.getMachine().components();
             	String address = (String)args.get(0);
             	
             	synchronized (components) {
                 	if (components.containsKey(address)) {
-                		return new Integer(owner.machine.host().componentSlot(address));
+                		return new Integer(owner.getMachine().host().componentSlot(address));
                 	}
 				}
             	
@@ -93,7 +88,7 @@ public class ComponentAPI extends MicroPythonAPI {
             	Object[] fargs = (Object[])args.get(2);
             	
             	try {
-					return owner.machine.invoke(address, method, fargs);
+					return owner.getMachine().invoke(address, method, fargs);
 				} catch (Exception e) {
 					// how to raise error?
 					

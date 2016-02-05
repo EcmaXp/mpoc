@@ -1,6 +1,5 @@
-package kr.pe.ecmaxp.mpoc;
+package kr.pe.ecmaxp.mpoc.api;
 
-import li.cil.oc.api.machine.Machine;
 // import li.cil.oc.util.GameTimeFormatter;
 import li.cil.oc.api.machine.Signal;
 
@@ -10,10 +9,9 @@ import org.micropython.jnupy.PythonObject;
 import org.micropython.jnupy.PythonArguments;
 import org.micropython.jnupy.PythonException;
 
-import java.util.Map;
-
 import org.micropython.jnupy.JavaFunction.*;
 
+import kr.pe.ecmaxp.mpoc.MicroPythonArch;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class ComputerAPI extends MicroPythonAPI {
@@ -22,7 +20,6 @@ public class ComputerAPI extends MicroPythonAPI {
     }
     
     public void initialize() throws PythonException {
-        PythonState pystate = owner.pystate;
         PythonModule module = owner.newOCModule("computer");
         
         module.set(new NamedJavaFun0("pullSignal") {

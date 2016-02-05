@@ -48,6 +48,11 @@ dependencies {
 
     // OpenComputers
     compile "li.cil.oc:OpenComputers:MC1.7.10-1.5.+:api"
+	
+	// use Jython for continue develop in windows while micropython unstable.
+    compile "org.python:jython-standalone:2.7.0"
+	// and for dev
+    compile "li.cil.oc:OpenComputers:MC1.7.10-1.5.+"
     
     // real examples
     //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
